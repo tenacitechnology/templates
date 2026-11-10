@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJ Skyler | Nobody should fight the VA alone</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,600;0,800;1,400&family=Instrument+Serif:ital@1&family=IBM+Plex+Mono:wght@400;600&family=Special+Elite&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  /* TENACI TASTE MODEL v1 (locked picks): dark cinematic human · bone/gold on ink ·
+     giant statement + one serif italic pivot · narrative chapters · tick-ruler progress ·
+     GSAP ScrollTrigger only, reliable technology, graceful no-JS, reduced-motion respected.
+     Concept: a biography in chapters. The credentials ARE the drama. */
+  :root {
+    --ink:#0d1117; --ink-2:#131920;
+    --bone:#EDE8DF; --bone-dim:#b5b0a6;
+    --gold:#C9A15C;
+    --hairline:rgba(237,232,223,.14);
+    --serif:'Instrument Serif',Georgia,serif;
+    --sans:'Figtree',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+  body { font-family:var(--sans); background:var(--ink); color:var(--bone); line-height:1.5; overflow-x:hidden; }
+  a:focus-visible, button:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
+  .wrap { max-width:1240px; margin:0 auto; padding:0 56px; }
+  h1 .serif, h2 .serif, .serif { font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; }
+
+  /* ── RULER HEADER (fixed): wordmark · sliding chapter marker on ticks · CTA ── */
+  .rhead {
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between; gap:24px;
+    padding:18px 56px; border-bottom:1px solid var(--hairline);
+    background:rgba(13,17,23,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  .rhead .wordmark { font-weight:800; font-size:17px; letter-spacing:.04em; white-space:nowrap; }
+  .rhead .wordmark i { font-style:normal; color:var(--gold); }
+  .ruler { position:relative; flex:1; max-width:520px; height:26px; display:flex; align-items:center; }
+  .ruler .ticks { position:absolute; left:0; right:0; top:12px; height:9px;
+    background:repeating-linear-gradient(90deg, rgba(237,232,223,.25) 0 1px, transparent 1px 18px); }
+  .ruler .marker { position:absolute; top:4px; width:2px; height:18px; background:var(--gold); left:0; transition:none; }
+  .ruler .chap { position:absolute; top:100%; left:0; transform:translateX(-50%);
+    font-size:10px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); white-space:nowrap; }
+  .rhead .book { font-size:13px; font-weight:600; color:var(--ink); background:var(--gold);
+    padding:10px 20px; text-decoration:none; white-space:nowrap; transition:background .2s; }
+  .rhead .book:hover { background:var(--bone); }
+  @media (max-width:900px) { .ruler { display:none; } .rhead { padding:14px 20px; } }
+
+  /* ── HERO (locked behind; chapters cover it) ── */
+  .hero { position:fixed; inset:0; z-index:0; min-height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+  .hero-bg { position:absolute; left:0; right:0; top:-8%; bottom:-8%; z-index:0; will-change:transform;
+    background:url("assets/battle-buddy.png") center 65%/cover no-repeat; }
+  .hero-video { width:100%; height:100%; object-fit:cover; display:block; }
+  .hero-scrim { position:absolute; inset:0; z-index:1;
+    background:
+      linear-gradient(180deg, rgba(13,17,23,.9) 0%, rgba(13,17,23,.42) 34%, rgba(13,17,23,.28) 55%, rgba(13,17,23,.92) 100%),
+      radial-gradient(70% 60% at 24% 42%, rgba(13,17,23,.62) 0%, rgba(13,17,23,0) 100%);
+  }
+  h1 .wmask { display:inline-block; overflow:hidden; vertical-align:bottom; padding-bottom:.09em; margin-bottom:-.09em; }
+  h1 .ch { display:inline-block; will-change:transform; }
+  h1 .serif { display:inline-block; }
+  .hero-body { margin-top:auto; padding:120px 56px 80px; max-width:1440px; position:relative; z-index:2; }
+  .kicker { display:flex; align-items:center; gap:14px; font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--bone-dim); margin-bottom:26px; }
+  .kicker::before { content:""; width:40px; height:1px; background:var(--gold); }
+  h1 { font-size:clamp(52px, 6.8vw, 104px); line-height:.98; letter-spacing:-.03em; font-weight:800; max-width:13ch; text-wrap:balance; }
+  .hero .sub { font-size:17px; line-height:1.65; color:var(--bone-dim); max-width:52ch; margin-top:28px; text-wrap:pretty; }
+  .hero .sub b { color:var(--bone); font-weight:600; }
+  .cta-row { display:flex; align-items:center; gap:26px; margin-top:40px; flex-wrap:wrap; }
+  .cta { background:var(--gold); color:var(--ink); font-weight:600; font-size:15px; padding:17px 34px; text-decoration:none; transition:background .2s, box-shadow .2s; }
+  .cta:hover { background:var(--bone); box-shadow:0 0 0 1px var(--gold), 0 8px 40px rgba(201,161,92,.25); }
+  .honesty { font-size:12.5px; color:var(--bone-dim); max-width:44ch; line-height:1.5; }
+  .honesty b { color:var(--bone); font-weight:600; }
+  .hero-rail { position:absolute; right:52px; bottom:80px; writing-mode:vertical-rl; font-family:var(--mono); font-size:10px; letter-spacing:.24em; color:var(--bone-dim); display:flex; align-items:center; gap:14px; z-index:2; }
+  .hero-rail::after { content:""; width:1px; height:64px; background:var(--hairline); }
+  .scroll-cue { position:absolute; left:50%; bottom:26px; transform:translateX(-50%); z-index:2;
+    font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--bone-dim); display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .scroll-cue::after { content:""; width:1px; height:34px; background:linear-gradient(var(--gold), transparent); }
+  @media (max-width:720px) { .hero-body { padding:100px 24px 64px; } .hero-rail, .scroll-cue { display:none; } h1 { font-size:clamp(38px,10.5vw,54px); } }
+
+  /* ── CHAPTERS ── */
+  .chapter { position:relative; z-index:1; background:var(--ink); padding:150px 0; border-top:1px solid var(--hairline); overflow:hidden; }
+  .hero + .chapter { margin-top:280vh; }
+  .chap-head { display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--bone-dim); margin-bottom:34px; }
+  .chap-head .idx { color:var(--gold); font-weight:800; }
+  .chap-head::after { content:""; flex:1; height:8px;
+    background:repeating-linear-gradient(90deg, rgba(237,232,223,.22) 0 1px, transparent 1px 14px);
+    background-size:100% 8px; background-position:bottom; }
+  h2 { font-size:clamp(36px, 4.4vw, 60px); letter-spacing:-.025em; font-weight:800; line-height:1.04; max-width:18ch; text-wrap:balance; }
+
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:70px; align-items:center; }
+  .chapter .imgbox { position:relative; overflow:hidden; border-radius:4px; border:1px solid var(--hairline); }
+  .chapter .imgbox .ph { width:100%; aspect-ratio:16/10; background-size:cover; background-position:center; display:block;
+    filter:saturate(.72) contrast(1.06); transform:scale(1.08); }
+  .chapter .imgbox .cap { position:absolute; left:14px; bottom:12px; font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(237,232,223,.65); }
+  .chapter .year { font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; }
+  .chapter p { color:var(--bone-dim); font-size:16.5px; margin-top:20px; max-width:48ch; }
+  .chapter p b { color:var(--bone); font-weight:600; }
+
+  /* full-bleed band chapters */
+  .band { position:relative; min-height:88vh; display:flex; align-items:flex-end; overflow:hidden; border-top:1px solid var(--hairline); }
+  .band .bg { position:absolute; inset:-12% 0; background-size:cover; background-position:center; filter:saturate(.7) contrast(1.08); }
+  .band .shade { position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(13,17,23,.55) 0%, rgba(13,17,23,.15) 40%, rgba(13,17,23,.92) 100%); }
+  .band .inner { position:relative; z-index:2; width:100%; padding:100px 56px 90px; max-width:1440px; margin:0 auto; }
+  .band .bignum { font-size:clamp(90px, 15vw, 220px); font-weight:800; letter-spacing:-.04em; line-height:.9; color:var(--bone); }
+  .band .bignum i { font-family:var(--serif); font-style:italic; font-weight:400; color:var(--gold); }
+  .band .bandline { font-size:16px; color:var(--bone-dim); max-width:52ch; margin-top:22px; }
+  .band .bandline b { color:var(--bone); font-weight:600; }
+
+  /* Holy Grail money treatment */
+  .grail .money { display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; margin-top:8px; }
+  .grail .money .amt { font-size:clamp(80px, 12vw, 180px); font-weight:800; letter-spacing:-.04em; line-height:.95; color:var(--gold); }
+  .grail .money .per { font-size:15px; color:var(--bone-dim); letter-spacing:.08em; text-transform:uppercase; }
+  .grail .bandline { max-width:58ch; font-size:17px; line-height:1.7; }
+
+  /* Record (trust): instrument panel */
+  .record .panel { display:flex; justify-content:center; align-items:stretch; gap:clamp(24px,4vw,64px); margin-top:64px; flex-wrap:wrap; }
+  .gauge-unit { width:200px; text-align:center; }
+  .gauge-unit svg { display:block; width:200px; height:200px; }
+  .gauge-unit .g-label { font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--bone-dim); margin-top:18px; line-height:1.7; }
+  .gauge-unit .g-val { font-family:var(--mono); font-weight:600; font-size:26px; letter-spacing:-.02em; fill:var(--bone); }
+  .gauge-unit .g-suffix { font-family:var(--serif); font-style:italic; font-size:22px; fill:var(--gold); }
+  .gauge-unit .g-ticks { stroke:rgba(237,232,223,.28); stroke-width:2; fill:none; }
+  .gauge-unit .g-ring { stroke:var(--hairline); stroke-width:1.5; fill:rgba(19,25,32,.5); }
+  .gauge-unit .g-arc { stroke:var(--gold); stroke-width:3; fill:none; stroke-linecap:round; }
+  .gauge-unit .g-needle { stroke:var(--gold); stroke-width:2.5; stroke-linecap:round; }
+  .gauge-unit .g-hub { fill:var(--gold); }
+  /* stamped brass data plate */
+  .plate {
+    position:relative; width:230px; border:1px solid rgba(201,161,92,.45); border-radius:3px;
+    background:linear-gradient(160deg, rgba(201,161,92,.08), rgba(201,161,92,.02) 60%);
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:14px; padding:34px 20px;
+  }
+  .plate .rivet { position:absolute; width:6px; height:6px; border-radius:50%; background:var(--gold); opacity:.7; }
+  .plate .rivet.tl { top:8px; left:8px; } .plate .rivet.tr { top:8px; right:8px; }
+  .plate .rivet.bl { bottom:8px; left:8px; } .plate .rivet.br { bottom:8px; right:8px; }
+  .plate .plate-line { font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.22em; color:var(--gold); text-align:center; }
+  .plate .plate-main { font-size:24px; font-weight:800; letter-spacing:.02em; line-height:1.15; text-transform:uppercase; text-align:center; color:var(--bone); }
+  .record .record-foot { font-size:15px; color:var(--bone-dim); margin-top:56px; max-width:52ch; }
+  .record .record-foot b { color:var(--bone); font-weight:600; }
+  @media (max-width:560px) { .record .panel { gap:36px; } }
+
+  /* Field Report: declassified case-file card */
+  .report .filecard {
+    position:relative; max-width:880px; margin:64px auto 0; transform:rotate(-.5deg);
+    background:
+      radial-gradient(120% 90% at 20% 0%, rgba(120,90,40,.10), transparent 55%),
+      radial-gradient(100% 100% at 90% 100%, rgba(120,90,40,.12), transparent 50%),
+      #E7DFC9;
+    color:#2b2517; padding:0; box-shadow:0 30px 80px rgba(0,0,0,.55), 0 4px 18px rgba(0,0,0,.4);
+    border:1px solid rgba(60,45,20,.35);
+  }
+  .filecard .tape { position:absolute; top:-14px; left:50%; transform:translateX(-50%) rotate(1.5deg); width:130px; height:30px; background:rgba(237,232,223,.35); box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .filecard .fc-head { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:#5a4d33; border-bottom:1px solid rgba(60,45,20,.35); padding:20px 32px 14px; }
+  .filecard .fc-body { display:grid; grid-template-columns:1.6fr 1fr; gap:0; }
+  .filecard .fc-quote { padding:34px 32px 30px; }
+  .filecard .fc-quote blockquote { font-family:'Special Elite',monospace; font-size:19px; line-height:1.75; color:#2b2517; }
+  .filecard .fc-quote .redact { background:#1c1710; color:#1c1710; padding:0 6px; border-radius:1px; user-select:none; }
+  .filecard .fc-annot { font-family:'Caveat',cursive; font-weight:600; font-size:27px; color:#a33327; margin-top:22px; transform:rotate(-1.2deg); display:inline-block; }
+  .filecard .fc-attr { font-family:'Special Elite',monospace; font-size:12.5px; letter-spacing:.06em; margin-top:14px; color:#5a4d33; }
+  .filecard .fc-meta { border-left:1px solid rgba(60,45,20,.35); padding:34px 26px; font-family:var(--mono); }
+  .filecard .fc-meta .row { display:flex; justify-content:space-between; gap:12px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:9px 0; border-bottom:1px dashed rgba(60,45,20,.3); }
+  .filecard .fc-meta .row:last-child { border-bottom:none; }
+  .filecard .fc-meta .k { color:#8a7a55; } .filecard .fc-meta .v { color:#2b2517; font-weight:600; text-align:right; }
+  .filecard .stamp {
+    position:absolute; right:22px; bottom:20px; transform:rotate(-9deg);
+    font-family:'Special Elite',monospace; font-size:14px; letter-spacing:.22em; text-transform:uppercase;
+    color:rgba(150,45,32,.62); border:3px double rgba(150,45,32,.55); border-radius:4px; padding:8px 14px;
+    mix-blend-mode:multiply; pointer-events:none;
+  }
+  .filecard .fc-foot { font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#8a7a55; border-top:1px solid rgba(60,45,20,.35); padding:12px 32px; }
+  @media (max-width:720px) {
+    .filecard .fc-body { grid-template-columns:1fr; }
+    .filecard .fc-meta { border-left:none; border-top:1px solid rgba(60,45,20,.35); }
+    .filecard .stamp { position:static; display:inline-block; margin:0 0 18px 32px; }
+  }
+
+  /* Slider: stacked case cards + controls */
+  .slider { margin-top:64px; }
+  .slider .viewport { position:relative; }
+  .slider .filecard { display:none; margin-top:0; }
+  .slider .filecard.active { display:block; }
+  .slider .filecard:nth-child(odd) { transform:rotate(.4deg); }
+  .slider .filecard:nth-child(even) { transform:rotate(-.6deg); }
+  .s-controls { display:flex; align-items:center; justify-content:center; gap:26px; margin-top:38px; }
+  .s-btn {
+    width:52px; height:52px; background:transparent; border:1px solid var(--hairline); color:var(--bone);
+    font-family:var(--mono); font-size:17px; cursor:pointer; transition:border-color .25s, color .25s;
+  }
+  .s-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .s-count { font-family:var(--mono); font-size:11px; letter-spacing:.22em; color:var(--bone-dim); }
+  .s-fineprint { font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--bone-dim); opacity:.7; text-align:center; margin-top:22px; }
+
+  /* Method steps */
+  .steps { margin-top:56px; border-top:1px solid var(--hairline); }
+  .step { display:grid; grid-template-columns:7rem 15rem 1fr; gap:36px; padding:40px 4px; border-bottom:1px solid var(--hairline); align-items:baseline; }
+  .step .num { font-size:48px; font-weight:800; letter-spacing:-.02em; color:transparent; -webkit-text-stroke:1px var(--gold); }
+  .step .verb { font-size:23px; font-weight:800; letter-spacing:-.01em; }
+  .step .verb i { font-family:var(--serif); font-style:italic; font-weight:400; }
+  .step p { color:var(--bone-dim); font-size:15.5px; max-width:50ch; }
+  .step p b { color:var(--bone); font-weight:600; }
+
+  /* Final */
+  .final { background:var(--gold); color:var(--ink); text-align:center; padding:150px 0; position:relative; z-index:1; }
+  .final .chap-head { justify-content:center; color:rgba(13,17,23,.6); }
+  .final .chap-head .idx { color:var(--ink); }
+  .final .chap-head::after { display:none; }
+  .final h2 { margin:0 auto 26px; max-width:16ch; color:var(--ink); }
+  .final h2 .serif { color:rgba(13,17,23,.85); }
+  .final p.lede { color:rgba(13,17,23,.72); max-width:44ch; margin:0 auto 42px; font-size:16px; }
+  .final .cta { background:var(--ink); color:var(--bone); }
+  .final .cta:hover { background:var(--ink-2); box-shadow:0 10px 44px rgba(13,17,23,.35); }
+  .disclaimer { max-width:70ch; margin:90px auto 0; font-size:11.5px; line-height:1.7; color:rgba(13,17,23,.62); }
+
+  footer { position:relative; z-index:1; background:var(--ink); border-top:1px solid var(--hairline); padding:36px 56px; display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; font-size:12.5px; letter-spacing:.04em; color:var(--bone-dim); }
+  footer a { color:var(--bone-dim); text-decoration:none; transition:color .2s; }
+  footer a:hover { color:var(--bone); }
+
+  @media (max-width:900px) {
+    .split { grid-template-columns:1fr; gap:36px; }
+    .chapter { padding:100px 0; }
+    .band .inner { padding:80px 24px 64px; }
+    .step { grid-template-columns:1fr; gap:10px; }
+    .step .num { font-size:34px; }
+    .wrap { padding:0 24px; }
+  }
+
+  /* ── BOOKING MODAL ── */
+  .modal-bd { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(9,12,17,.74); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px);
+    opacity:0; pointer-events:none; transition:opacity .28s ease; }
+  .modal-bd.open { opacity:1; pointer-events:auto; }
+  .modal { width:min(580px,94vw); max-height:90vh; overflow-y:auto; background:var(--ink-2); border:1px solid var(--hairline);
+    box-shadow:0 40px 90px rgba(0,0,0,.55); padding:38px 42px 34px; position:relative; }
+  .modal::after { content:""; position:absolute; left:0; right:0; top:0; height:2px; background:linear-gradient(90deg, var(--gold), transparent 65%); }
+  .m-close { position:absolute; top:14px; right:16px; background:none; border:1px solid var(--hairline); width:34px; height:34px;
+    color:var(--bone-dim); font-size:15px; cursor:pointer; line-height:1; transition:border-color .2s, color .2s; z-index:2; }
+  .m-close:hover { border-color:var(--gold); color:var(--gold); }
+  .m-count { font-family:var(--mono); font-size:10px; letter-spacing:.24em; color:var(--gold); text-transform:uppercase; margin-bottom:10px; }
+  .m-progress { display:flex; align-items:center; gap:10px; margin-bottom:30px; }
+  .m-node { font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; color:rgba(181,176,166,.4); transition:color .3s; }
+  .m-node.on { color:var(--gold); }
+  .m-track { flex:1; height:1px; background:var(--hairline); position:relative; }
+  .m-fill { position:absolute; left:0; top:0; bottom:0; background:var(--gold); width:0%; transition:width .45s cubic-bezier(.2,.7,.2,1); }
+  .m-title { font-size:clamp(24px,4.4vw,31px); font-weight:800; line-height:1.12; margin-bottom:8px; letter-spacing:-.01em; }
+  .m-title em { font-family:var(--serif); font-style:italic; font-weight:400; font-size:1.08em; }
+  .m-sub { font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; color:var(--bone-dim); margin-bottom:32px; }
+  .m-step { display:none; }
+  .m-step.active { display:block; animation:mIn .42s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes mIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  .m-field { margin-bottom:26px; }
+  .m-label { display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--bone-dim); margin-bottom:4px; }
+  .m-input { width:100%; background:transparent; border:none; border-bottom:1px solid var(--hairline); color:var(--bone);
+    padding:12px 2px; font-family:var(--sans); font-size:17px; border-radius:0; transition:border-color .25s; }
+  .m-input:focus { outline:none; border-bottom-color:var(--gold); }
+  .m-input.bad { border-bottom-color:#d08070; }
+  .m-input::placeholder { color:rgba(181,176,166,.26); }
+  .m-err { display:none; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:#d98a78; margin-top:8px; }
+  .m-err.show { display:block; animation:mIn .3s ease both; }
+  .m-actions { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-top:28px; }
+  .m-back { background:none; border:none; color:var(--bone-dim); font-family:var(--mono); font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; cursor:pointer; padding:10px 0; }
+  .m-back:hover { color:var(--bone); }
+  .m-back[disabled] { visibility:hidden; }
+  .m-next { background:var(--gold); color:#141009; border:none; padding:14px 30px; font-weight:800; font-size:13.5px;
+    letter-spacing:.08em; cursor:pointer; transition:filter .2s, transform .15s; }
+  .m-next:hover { filter:brightness(1.1); transform:translateY(-1px); }
+  .m-tz { font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; color:var(--bone-dim); margin-bottom:14px; text-transform:uppercase; }
+  .m-calhead { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .m-month { font-weight:800; font-size:15px; letter-spacing:.04em; }
+  .m-nav { background:none; border:1px solid var(--hairline); color:var(--bone); width:30px; height:30px; cursor:pointer; margin-left:6px; }
+  .m-nav:hover { border-color:var(--gold); color:var(--gold); }
+  .m-cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:20px; }
+  .m-dow { font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; color:var(--bone-dim); text-align:center; padding:6px 0; text-transform:uppercase; }
+  .m-day { aspect-ratio:1; background:none; border:1px solid transparent; color:var(--bone); font-family:var(--sans); font-size:13.5px;
+    cursor:pointer; transition:border-color .15s, color .15s; }
+  .m-day:hover:not([disabled]) { border-color:var(--gold); }
+  .m-day.sel { background:var(--gold); color:#141009; font-weight:800; }
+  .m-day[disabled] { color:rgba(181,176,166,.28); cursor:default; text-decoration:line-through; }
+  .m-slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:6px; }
+  .m-slot { border:1px solid var(--hairline); background:none; color:var(--bone); font-family:var(--mono); font-size:12px;
+    padding:10px 0; cursor:pointer; transition:border-color .15s; }
+  .m-slot:hover:not([disabled]) { border-color:var(--gold); }
+  .m-slot.sel { background:var(--gold); color:#141009; font-weight:600; }
+  .m-slot[disabled] { color:rgba(181,176,166,.28); cursor:default; text-decoration:line-through; }
+  .m-empty { font-family:var(--mono); font-size:11px; color:var(--bone-dim); }
+  .m-sum { border:1px solid var(--hairline); padding:18px 20px; margin-bottom:22px; }
+  .m-sumrow { display:flex; justify-content:space-between; gap:16px; padding:7px 0; border-bottom:1px solid rgba(237,232,223,.07); font-size:14px; }
+  .m-sumrow:last-child { border-bottom:none; }
+  .m-sumrow b { font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--bone-dim); font-weight:400; }
+  .m-mail { border:1px solid var(--hairline); background:var(--ink); padding:16px 18px; margin-bottom:14px; }
+  .m-mailhead { font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; color:var(--bone-dim); line-height:1.9;
+    border-bottom:1px solid rgba(237,232,223,.08); padding-bottom:10px; margin-bottom:10px; }
+  .m-mailhead b { color:var(--gold); font-weight:600; }
+  .m-mailbody { font-size:13.5px; line-height:1.65; color:var(--bone); }
+  .m-mailbody em { font-family:var(--serif); font-style:italic; font-size:15px; }
+  .m-done-title { font-family:var(--serif); font-style:italic; font-size:clamp(30px,5.4vw,40px); font-weight:400; line-height:1.1; margin:4px 0 12px; }
+  .m-stamp { display:inline-block; margin-top:28px; padding:11px 24px; border:2px solid var(--gold); color:var(--gold);
+    font-family:var(--mono); font-size:12px; letter-spacing:.32em; text-transform:uppercase; transform:rotate(-4deg); }
+  .m-build { position:absolute; bottom:12px; left:16px; font-family:var(--mono); font-size:9px; letter-spacing:.14em;
+    color:rgba(181,176,166,.35); text-transform:uppercase; }
+  @media (max-width:640px){ .modal{ padding:30px 22px; } }
+</style>
+</head>
+<body>
+
+<header class="rhead" aria-label="Site header">
+  <div class="wordmark">DJ Skyler<i>.</i></div>
+  <div class="ruler" aria-hidden="true">
+    <div class="ticks"></div>
+    <div class="marker" id="marker"></div>
+    <div class="chap" id="chapLabel">Prologue</div>
+  </div>
+  <a class="book" href="#book">Book a call</a>
+</header>
+
+<!-- PROLOGUE -->
+<section class="hero" data-chap="Prologue">
+  <div class="hero-bg">
+    <video class="hero-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="assets/hero-talk.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-scrim"></div>
+  <div class="hero-body">
+    <div class="kicker rv">One coach. One veteran at a time.</div>
+    <h1 class="rv">Nobody should fight the VA alone. <span class="serif">Especially not you.</span></h1>
+    <p class="sub rv">DJ Skyler is a retired Navy Command Master Chief who won his own claim: <b>100% P&amp;T, from [CLIENT: starting rating] to full</b>. Now he sits down with veterans one-on-one and teaches them how to build and file theirs. Education and coaching. <b>You keep control of your claim.</b></p>
+    <div class="cta-row rv">
+      <a class="cta" href="#book">Book your free 30-minute strategy session</a>
+      <span class="honesty"><b>No win, no fee.</b> He is not an accredited representative and he is not the VA. You file your own claim, and he makes sure you are ready.</span>
+    </div>
+  </div>
+  <div class="hero-rail" aria-hidden="true">A BIOGRAPHY IN CHAPTERS</div>
+  <div class="scroll-cue" aria-hidden="true">Scroll</div>
+</section>
+
+<!-- CH 01 -->
+<section class="chapter" data-chap="01 · The Corpsman">
+  <div class="wrap">
+    <div class="chap-head"><span class="idx">Chapter 01</span><span>The Corpsman</span></div>
+    <div class="split">
+      <div class="imgbox">
+        <div class="ph" data-para style="background-image:url('ch-corpsman.png')"></div>
+      </div>
+      <div>
+        <div class="year rv">1999 · Oakland, California</div>
+        <h2 class="rv">He started as the one they hand the wounded <span class="serif">to.</span></h2>
+        <p class="rv">Eighteen years old, sworn into the Navy as a <b>hospital corpsman</b>. The rating that means: when someone is hurt, you are the one they reach for. He learned how systems treat people at their worst moments, because he was standing there for twenty-five years of them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CH 02 full-bleed band -->
+<section class="band" data-chap="02 · Twenty-Five Years">
+  <div class="bg" data-band style="background-image:url('ch-boots2.png')"></div>
+  <div class="shade"></div>
+  <div class="inner">
+    <div class="chap-head"><span class="idx">Chapter 02</span><span>Twenty-five years</span></div>
+    <div class="bignum rv">25 <i>years.</i></div>
+    <p class="bandline rv"><b>Three combat tours in Afghanistan. One in Iraq.</b> Operations Enduring Freedom and Iraqi Freedom. He did not study this system from the outside. He served inside it.</p>
+  </div>
+</section>
+
+<!-- CH 03 -->
+<section class="chapter" data-chap="03 · Master Chief">
+  <div class="wrap">
+    <div class="chap-head"><span class="idx">Chapter 03</span><span>Command Master Chief</span></div>
+    <div class="split">
+      <div>
+        <h2 class="rv">The rank they <span class="serif">come to.</span></h2>
+        <p class="rv"><b>Command Master Chief</b>, the highest enlisted rank in the Navy. The person an entire crew goes to when it matters. Then a graduate degree in <b>healthcare administration</b>, because understanding people was never going to be enough. He had to understand the institution too.</p>
+        <p class="rv">That is the man who will sit across from you on the call.</p>
+      </div>
+      <div class="imgbox">
+        <div class="ph" data-para style="background-image:url('ch-anchor2.png')"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CH 04 The Holy Grail -->
+<section class="band grail" data-chap="04 · The Holy Grail">
+  <div class="bg" data-band style="background-image:url('kimi-dl/va-claims-folder-documentary.png')"></div>
+  <div class="shade"></div>
+  <div class="inner">
+    <div class="chap-head"><span class="idx">Chapter 04</span><span>The Holy Grail</span></div>
+    <div class="bignum rv">0% <i>to</i> 100% P&amp;T</div>
+    <div class="money rv"><span class="amt">$3,870</span><span class="per">per month · tax-free · for life</span></div>
+    <p class="bandline rv">A single father. <b>Twenty years of waiting.</b> A zero percent rating and a file going nowhere. DJ walked him through every page, every form, every piece of evidence. Then the VA came back with the answer they both had earned. They call this one the <b>Holy Grail</b>.</p>
+  </div>
+</section>
+
+<!-- CH 05 The Record (trust): instrument panel -->
+<section class="chapter record" data-chap="05 · The Record">
+  <div class="wrap">
+    <div class="chap-head"><span class="idx">Chapter 05</span><span>The record</span></div>
+    <h2 class="rv">Trust is built on <span class="serif">receipts.</span></h2>
+    <div class="panel">
+      <div class="gauge-unit rv" data-value="25" data-max="30" data-suffix="" data-label="Years in uniform"></div>
+      <div class="gauge-unit rv" data-value="100" data-max="100" data-suffix="+" data-label="Veterans guided to increases"></div>
+      <div class="gauge-unit rv" data-value="100" data-max="100" data-suffix="%" data-label="P&amp;T rating, won firsthand"></div>
+      <div class="plate rv">
+        <div class="rivet tl"></div><div class="rivet tr"></div><div class="rivet bl"></div><div class="rivet br"></div>
+        <div class="plate-line">CMDCM (RET.) · USN</div>
+        <div class="plate-main">Command<br>Master Chief</div>
+        <div class="plate-line">MHA · GRADUATE DEGREE</div>
+      </div>
+    </div>
+    <p class="record-foot rv">When he is not coaching, he is a husband, a father, and somewhere outdoors. <b>He answers his own calls.</b></p>
+  </div>
+</section>
+
+<!-- CH 06 Field Reports (testimonial slider, fictionalized composites from real outcomes) -->
+<section class="chapter report" data-chap="06 · Field Reports">
+  <div class="wrap">
+    <div class="chap-head"><span class="idx">Chapter 06</span><span>Field reports</span></div>
+    <h2 class="rv">In their own <span class="serif">words.</span></h2>
+    <div class="slider rv">
+      <div class="viewport" id="reportViewport">
+
+        <div class="filecard active">
+          <div class="tape"></div>
+          <div class="fc-head"><span>Claims Coaching Field Report</span><span>Case No. J4V-118</span><span>Status: Declassified</span></div>
+          <div class="fc-body">
+            <div class="fc-quote">
+              <blockquote>"I sat on my denial for nine years because the VA felt like a wall. DJ sat down with me, read every page, and showed me what the evidence was actually saying. <span class="redact">█████████</span> He never filed anything for me. He taught me how to file it myself, then checked every line before I sent it."</blockquote>
+              <span class="fc-annot">0% to 90%. Fourteen months.</span>
+              <div class="fc-attr">R. MENDEZ, U.S. MARINE CORPS (RET.)<br>FICTIONALIZED COMPOSITE</div>
+            </div>
+            <div class="fc-meta">
+              <div class="row"><span class="k">Service</span><span class="v">USMC 2003-2011</span></div>
+              <div class="row"><span class="k">Claim start</span><span class="v">0% · denied 2014</span></div>
+              <div class="row"><span class="k">Timeline</span><span class="v">14 months coached</span></div>
+              <div class="row"><span class="k">Outcome</span><span class="v">90% combined</span></div>
+              <div class="row"><span class="k">Filed by</span><span class="v">The veteran</span></div>
+            </div>
+          </div>
+          <div class="stamp">Outcome Confirmed</div>
+        </div>
+
+        <div class="filecard">
+          <div class="tape"></div>
+          <div class="fc-head"><span>Claims Coaching Field Report</span><span>Case No. J4V-121</span><span>Status: Declassified</span></div>
+          <div class="fc-body">
+            <div class="fc-quote">
+              <blockquote>"Fifteen years in the Army Reserve and I thought my file was thin. DJ found the paper trail I did not know I had. <span class="redact">██████</span> When the decision came back, I read it twice. Then I called my mom."</blockquote>
+              <span class="fc-annot">$3,737 a month. Tax-free. For life.</span>
+              <div class="fc-attr">T. KOWALSKI, U.S. ARMY RESERVE (RET.)<br>FICTIONALIZED COMPOSITE</div>
+            </div>
+            <div class="fc-meta">
+              <div class="row"><span class="k">Service</span><span class="v">USAR, 15 years</span></div>
+              <div class="row"><span class="k">Claim start</span><span class="v">0% · filed 2023</span></div>
+              <div class="row"><span class="k">Timeline</span><span class="v">Coached start to finish</span></div>
+              <div class="row"><span class="k">Outcome</span><span class="v">100% P&amp;T</span></div>
+              <div class="row"><span class="k">Filed by</span><span class="v">The veteran</span></div>
+            </div>
+          </div>
+          <div class="stamp">Evidence Sufficient</div>
+        </div>
+
+        <div class="filecard">
+          <div class="tape"></div>
+          <div class="fc-head"><span>Claims Coaching Field Report</span><span>Case No. J4V-127</span><span>Status: Declassified</span></div>
+          <div class="fc-body">
+            <div class="fc-quote">
+              <blockquote>"Ten years Navy, already at 70%, told I should be grateful. DJ said gratitude is not a rating. He showed me what 100% actually requires, and my wife sat in on every call. <span class="redact">███████</span> We filed it together."</blockquote>
+              <span class="fc-annot">70 to 100. With his family watching.</span>
+              <div class="fc-attr">F. OKAFOR, U.S. NAVY (RET.)<br>FICTIONALIZED COMPOSITE</div>
+            </div>
+            <div class="fc-meta">
+              <div class="row"><span class="k">Service</span><span class="v">USN, 10 years</span></div>
+              <div class="row"><span class="k">Claim start</span><span class="v">70% combined</span></div>
+              <div class="row"><span class="k">Timeline</span><span class="v">One rating cycle</span></div>
+              <div class="row"><span class="k">Outcome</span><span class="v">100% P&amp;T</span></div>
+              <div class="row"><span class="k">Filed by</span><span class="v">The veteran</span></div>
+            </div>
+          </div>
+          <div class="stamp">Rating Granted</div>
+        </div>
+
+        <div class="filecard">
+          <div class="tape"></div>
+          <div class="fc-head"><span>Claims Coaching Field Report</span><span>Case No. J4V-133</span><span>Status: Declassified</span></div>
+          <div class="fc-body">
+            <div class="fc-quote">
+              <blockquote>"I left the Corps with nothing on paper and a decade of telling myself it was not worth it. One phone call. That is all it took to find out I was wrong. <span class="redact">████████████</span> The nexus letter was mine. The file was mine. The win was mine."</blockquote>
+              <span class="fc-annot">A decade of sitting on it. Then filed.</span>
+              <div class="fc-attr">D. REYES, U.S. MARINE CORPS (RET.)<br>FICTIONALIZED COMPOSITE</div>
+            </div>
+            <div class="fc-meta">
+              <div class="row"><span class="k">Service</span><span class="v">USMC, 5 years</span></div>
+              <div class="row"><span class="k">Claim start</span><span class="v">0% · never filed</span></div>
+              <div class="row"><span class="k">Timeline</span><span class="v">First claim ever</span></div>
+              <div class="row"><span class="k">Outcome</span><span class="v">100% P&amp;T</span></div>
+              <div class="row"><span class="k">Filed by</span><span class="v">The veteran</span></div>
+            </div>
+          </div>
+          <div class="stamp">Claim Won By Veteran</div>
+        </div>
+
+        <div class="filecard">
+          <div class="tape"></div>
+          <div class="fc-head"><span>Claims Coaching Field Report</span><span>Case No. J4V-140</span><span>Status: Declassified</span></div>
+          <div class="fc-body">
+            <div class="fc-quote">
+              <blockquote>"Three tours, one denial, zero patience left. DJ did not promise me anything. He promised me he would check my work. <span class="redact">█████</span> He checked it line by line until there was nothing left to fix."</blockquote>
+              <span class="fc-annot">0% to 100% P&amp;T.</span>
+              <div class="fc-attr">J. THIBODEAUX, U.S. MARINE CORPS (RET.)<br>FICTIONALIZED COMPOSITE</div>
+            </div>
+            <div class="fc-meta">
+              <div class="row"><span class="k">Service</span><span class="v">USMC, 10 years</span></div>
+              <div class="row"><span class="k">Claim start</span><span class="v">0% · denied</span></div>
+              <div class="row"><span class="k">Timeline</span><span class="v">Coached start to finish</span></div>
+              <div class="row"><span class="k">Outcome</span><span class="v">100% P&amp;T</span></div>
+              <div class="row"><span class="k">Filed by</span><span class="v">The veteran</span></div>
+            </div>
+          </div>
+          <div class="stamp">No Win No Fee Paid</div>
+        </div>
+
+      </div>
+      <div class="s-controls">
+        <button class="s-btn" id="prevReport" aria-label="Previous report">&#8592;</button>
+        <span class="s-count" id="reportCount">01 / 05</span>
+        <button class="s-btn" id="nextReport" aria-label="Next report">&#8594;</button>
+      </div>
+      <p class="s-fineprint">Names and details fictionalized composites drawn from real coaching outcomes. Individual results. Every claim is different. You file your own claim.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CH 07 Method -->
+<section class="chapter" data-chap="07 · The Method">
+  <div class="wrap">
+    <div class="chap-head"><span class="idx">Chapter 07</span><span>The method</span></div>
+    <h2 class="rv">Three steps. <span class="serif">He stands with you.</span></h2>
+    <div class="steps">
+      <div class="step rv"><div class="num">01</div><div class="verb">Book <i>the call</i></div><p>A free 30-minute strategy session. <b>You talk, he listens.</b> No pressure, no obligation, no jargon.</p></div>
+      <div class="step rv"><div class="num">02</div><div class="verb">Get <i>your plan</i></div><p>He reviews your situation and maps your next moves: <b>what to gather, what to document, what to fix</b> before anything gets filed.</p></div>
+      <div class="step rv"><div class="num">03</div><div class="verb">File <i>with support</i></div><p>You prepare and file your own claim, start to finish. <b>He educates, you decide.</b> If there is nothing to work on, he tells you straight.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="final" id="book" data-chap="Next Step">
+  <div class="wrap">
+    <div class="chap-head"><span class="idx">Next step</span></div>
+    <h2 class="rv">The claim you earned should not be a fight you fight <span class="serif">alone.</span></h2>
+    <p class="lede rv">Book the free strategy session. Two cohorts per quarter, limited seats.</p>
+    <a class="cta rv" href="#book">Book your free 30-minute strategy session</a>
+    <p class="disclaimer rv">DJ Skyler is a veteran coach providing disability benefits education and coaching. He is not an accredited agent, attorney, or Veterans Service Organization recognized by the Department of Veterans Affairs, and is not affiliated with the VA. You prepare and file your own claim. Accredited representatives, including VSOs, may offer their services for free.</p>
+  </div>
+</section>
+
+<footer>
+  <div>DJ Skyler · Just 4 Veterans</div>
+  <div><a href="#">Privacy</a> &nbsp; <a href="#">Terms</a> &nbsp; <a href="#">Contact</a></div>
+</footer>
+
+<!-- BOOKING MODAL -->
+<div class="modal-bd" id="bookModal" role="dialog" aria-modal="true" aria-label="Book a strategy session">
+  <div class="modal">
+    <button class="m-close" id="mClose" aria-label="Close">&times;</button>
+    <div class="m-count" id="mCount">Step 01 / 04</div>
+    <div class="m-progress">
+      <span class="m-node on" data-n="1">01</span>
+      <div class="m-track"><div class="m-fill" id="mFill"></div></div>
+      <span class="m-node" data-n="2">02</span>
+      <span class="m-node" data-n="3">03</span>
+      <span class="m-node" data-n="4">04</span>
+    </div>
+
+    <div class="m-step active" data-step="1">
+      <div class="m-title">Who is <em class="serif">fighting?</em></div>
+      <div class="m-sub">CASE INTAKE / CONTACT</div>
+      <div class="m-field">
+        <label class="m-label" for="mName">Full name</label>
+        <input class="m-input" id="mName" type="text" autocomplete="name" placeholder="Marcus Reed">
+        <div class="m-err" id="errName">Enter your full name.</div>
+      </div>
+      <div class="m-field">
+        <label class="m-label" for="mEmail">Email</label>
+        <input class="m-input" id="mEmail" type="email" autocomplete="email" placeholder="you@email.com">
+        <div class="m-err" id="errEmail">Enter a valid email address.</div>
+      </div>
+    </div>
+
+    <div class="m-step" data-step="2">
+      <div class="m-title">Where do we <em class="serif">reach</em> you?</div>
+      <div class="m-sub">CASE INTAKE / PHONE</div>
+      <div class="m-field">
+        <label class="m-label" for="mPhone">Phone number</label>
+        <input class="m-input" id="mPhone" type="tel" autocomplete="tel" placeholder="(555) 000-0000">
+        <div class="m-err" id="errPhone">Enter a valid phone number.</div>
+      </div>
+    </div>
+
+    <div class="m-step" data-step="3">
+      <div class="m-title">Pick your <em class="serif">seat</em> at the table.</div>
+      <div class="m-sub">AVAILABILITY / 30 MINUTES</div>
+      <div class="m-tz" id="mTz"></div>
+      <div class="m-calhead">
+        <div class="m-month" id="mMonth"></div>
+        <div>
+          <button class="m-nav" id="mCalPrev" type="button" aria-label="Previous month">&#8249;</button>
+          <button class="m-nav" id="mCalNext" type="button" aria-label="Next month">&#8250;</button>
+        </div>
+      </div>
+      <div class="m-cal" id="mCal"></div>
+      <div class="m-slots" id="mSlots"><div class="m-empty">Select a day to see open times.</div></div>
+      <div class="m-err" id="errSlot">Pick a day and a time.</div>
+    </div>
+
+    <div class="m-step" data-step="4">
+      <div class="m-title">Confirm the <em class="serif">details.</em></div>
+      <div class="m-sub">REVIEW / WHAT GETS SENT</div>
+      <div class="m-sum" id="mSum"></div>
+      <div class="m-mail">
+        <div class="m-mailhead">TO: <b id="mailClientTo"></b><br>SUBJECT: <b>Your strategy session is on the books</b></div>
+        <div class="m-mailbody" id="mailClient"></div>
+      </div>
+      <div class="m-mail">
+        <div class="m-mailhead">TO: <b id="mailAjTo"></b><br>SUBJECT: <b>New booking / strategy session</b></div>
+        <div class="m-mailbody" id="mailAj"></div>
+      </div>
+    </div>
+
+    <div class="m-step" data-step="5">
+      <div class="m-count">Step 04 / 04</div>
+      <div class="m-done-title">You are on the books.</div>
+      <div class="m-sub">CONFIRMATION PREVIEWED FOR BOTH PARTIES / DEMO</div>
+      <div class="m-mailbody" id="mDoneWhen" style="font-size:15px"></div>
+      <div class="m-stamp">Session locked</div>
+    </div>
+
+    <div class="m-actions">
+      <button class="m-back" id="mBack" type="button" disabled>Back</button>
+      <button class="m-next" id="mNext" type="button">Continue</button>
+    </div>
+    <div class="m-build">BUILD 2026-11-02.1</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || typeof gsap === 'undefined') return; // no-JS and reduced-motion: everything stays visible
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Hero: split headline into masked chars (pivot stays one piece)
+  (function(){
+    var h1 = document.querySelector('.hero h1');
+    var nodes = Array.prototype.slice.call(h1.childNodes);
+    h1.innerHTML = '';
+    nodes.forEach(function(node){
+      if (node.nodeType === 3) {
+        node.textContent.split(/(\s+)/).forEach(function(word){
+          if (!word) return;
+          if (/^\s+$/.test(word)) { h1.appendChild(document.createTextNode(' ')); return; }
+          var mask = document.createElement('span'); mask.className = 'wmask';
+          word.split('').forEach(function(c){
+            var s = document.createElement('span'); s.className = 'ch'; s.textContent = c;
+            mask.appendChild(s);
+          });
+          h1.appendChild(mask);
+        });
+      } else {
+        var mask = document.createElement('span'); mask.className = 'wmask';
+        mask.appendChild(node); h1.appendChild(mask);
+      }
+    });
+  })();
+
+  // Hero: PINNED scroll sequence. The section holds until its story completes:
+  // "Nobody should fight the VA alone." rises first, then "Especially not you.",
+  // then the supporting cast, then grayscale-to-color as the footage comes alive,
+  // text lifts away, and only then does the page release into Chapter 01.
+  // Rest state is owned HERE, explicitly — the timeline's .to() tweens only own motion.
+  // (fromTo inside a scrubbed timeline does not reliably paint its from-state at rest.)
+  gsap.set('.hero h1 .ch', { yPercent: 115, rotate: 4 });
+  gsap.set('.hero h1 .serif', { yPercent: 118 });
+  gsap.set('.hero .kicker', { opacity: 0, y: 14 });
+  gsap.set('.hero .sub', { opacity: 0, y: 22 });
+  gsap.set('.hero .cta-row', { opacity: 0, y: 20 });
+  gsap.set('.hero-rail, .scroll-cue', { opacity: 0 });
+  gsap.set('.hero-bg', { filter: 'grayscale(1) saturate(.55) brightness(.92)' });
+  gsap.set('.hero-video', { opacity: 0 });
+
+  var heroVid = document.querySelector('.hero-video');
+  var heroTl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '.hero', start: 'top top', end: '+=180%', scrub: 0.5,
+      onUpdate: function(self){
+        // the clip plays on its own (muted autoplay); scroll nudges it forward
+        // when it drifts behind the scroll position. No gates, no state.
+        if (!heroVid || heroVid.style.display === 'none') return;
+        if (heroVid.readyState < 2 || !heroVid.duration) return;
+        var t = 0.2 + Math.min(self.progress, 1) * (heroVid.duration - 0.4);
+        if (heroVid.currentTime < t - 0.3) heroVid.currentTime = t; // catch up only
+      }
+    }
+  });
+  heroTl
+    .to('.hero h1 .ch', { yPercent: 0, rotate: 0, duration: .18, ease: 'none', stagger: .012 }, 0)
+    .to('.hero h1 .serif', { yPercent: 0, duration: .14, ease: 'none' }, .53)
+    .to('.hero .kicker', { opacity: 1, y: 0, duration: .06, ease: 'none' }, .68)
+    .to('.hero .sub', { opacity: 1, y: 0, duration: .07, ease: 'none' }, .74)
+    .to('.hero .cta-row', { opacity: 1, y: 0, duration: .07, ease: 'none' }, .81)
+    .to('.hero-rail, .scroll-cue', { opacity: 1, duration: .05, ease: 'none' }, .88)
+    .to('.hero-bg', { filter: 'grayscale(0) saturate(1.03) brightness(1)', scale: 1.05, duration: .24, ease: 'none' }, .66)
+    // the photo lives first; the footage fades in as the pivot lands
+    .to('.hero-video', { opacity: 1, duration: .14, ease: 'none' }, .55)
+    .to('.hero-body', { y: -70, opacity: 0, duration: .1, ease: 'none' }, .9)
+    // parallax handoff: footage recedes upward and magnifies as Chapter 01 sweeps in over it
+    .to('.hero-bg', { y: -160, scale: 1.16, duration: .15, ease: 'none' }, .85);
+
+  // Hero video: pause once the covering chapter has swept over (no wasted decode behind opaque ink)
+  ScrollTrigger.create({
+    trigger: '.hero + .chapter', start: 'top 20%',
+    onEnter: function(){ if (heroVid && !heroVid.paused) heroVid.pause(); },
+    onLeaveBack: function(){ /* scrub resumes automatically on next onUpdate */ }
+  });
+
+  // Hero video: if the file is missing, get out of the way so the still shows.
+  // Otherwise it plays muted on its own — nothing else to manage.
+  (function(){
+    var vid = document.querySelector('.hero-video');
+    if (!vid) return;
+    if (vid.error || (vid.querySelector('source') && vid.querySelector('source').error)) { vid.style.display = 'none'; return; }
+    vid.addEventListener('error', function(){ vid.style.display = 'none'; }, true);
+  })();
+
+  // Chapter content: fade-up on enter
+  document.querySelectorAll('.chapter .rv, .final .rv').forEach(function(el){
+    gsap.from(el, {
+      opacity: 0, y: 30, duration: 1.1, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+    });
+  });
+
+  // Band chapters: headline + copy rise
+  document.querySelectorAll('.band .rv').forEach(function(el){
+    gsap.from(el, {
+      opacity: 0, y: 44, duration: 1.2, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 88%', once: true }
+    });
+  });
+
+  // Image parallax inside chapter frames
+  document.querySelectorAll('[data-para]').forEach(function(el){
+    gsap.fromTo(el, { yPercent: -6 }, {
+      yPercent: 6, ease: 'none',
+      scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  });
+
+  // Full-bleed band backgrounds: slow settle + drift
+  document.querySelectorAll('[data-band]').forEach(function(el){
+    gsap.fromTo(el, { yPercent: -8, scale: 1.06 }, {
+      yPercent: 8, scale: 1, ease: 'none',
+      scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  });
+
+  // Instrument panel: build each gauge as SVG, sweep needle + fill arc on scroll (spring settle)
+  var SWEEP = 240, START = -150; // degrees: rest up-left, sweep through the top like an altimeter
+  document.querySelectorAll('.gauge-unit').forEach(function(unit){
+    var value = parseFloat(unit.getAttribute('data-value')) || 0;
+    var max = parseFloat(unit.getAttribute('data-max')) || 100;
+    var suffix = unit.getAttribute('data-suffix') || '';
+    var label = unit.getAttribute('data-label') || '';
+    var frac = Math.min(value / max, 1);
+    var C = 2 * Math.PI * 80; // ring circumference
+    var arcLen = frac * C;
+    unit.innerHTML =
+      '<svg viewBox="0 0 200 200" aria-hidden="true">' +
+      '<circle class="g-ticks" cx="100" cy="100" r="92" stroke-dasharray="2 7.66"></circle>' +
+      '<circle class="g-ring" cx="100" cy="100" r="80"></circle>' +
+      '<circle class="g-arc" cx="100" cy="100" r="80" transform="rotate(' + START + ' 100 100)"' +
+      ' stroke-dasharray="' + arcLen.toFixed(1) + ' ' + C.toFixed(1) + '"></circle>' +
+      '<g class="needle-g" transform="rotate(' + START + ' 100 100)">' +
+      '<line class="g-needle" x1="100" y1="100" x2="100" y2="34"></line>' +
+      '</g>' +
+      '<circle class="g-hub" cx="100" cy="100" r="4"></circle>' +
+      '<text x="100" y="142" text-anchor="middle"><tspan class="g-val">0</tspan><tspan class="g-suffix">' + suffix + '</tspan></text>' +
+      '</svg>' +
+      '<div class="g-label">' + label + '</div>';
+
+    var needle = unit.querySelector('.needle-g');
+    var valEl = unit.querySelector('.g-val');
+    var endAngle = START + SWEEP * frac;
+    ScrollTrigger.create({
+      trigger: unit, start: 'top 85%', once: true,
+      onEnter: function(){
+        gsap.to(needle, { attr: { transform: 'rotate(' + endAngle + ' 100 100)' }, duration: 2.0, ease: 'elastic.out(1, 0.45)' });
+        var o = { v: 0 };
+        gsap.to(o, { v: value, duration: 1.8, ease: 'power2.out', onUpdate: function(){ valEl.textContent = Math.round(o.v); } });
+        gsap.from(unit.querySelector('.g-arc'), { opacity: 0, duration: 1.2, ease: 'power2.out' });
+      }
+    });
+  });
+
+  // Field Report slider: stacked case cards, one visible
+  (function(){
+    var cards = Array.prototype.slice.call(document.querySelectorAll('#reportViewport .filecard'));
+    var countEl = document.getElementById('reportCount');
+    var idx = 0, busy = false;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function pad(n){ return (n < 9 ? '0' : '') + (n + 1); }
+    function show(n, dir){
+      if (busy || n === idx) return;
+      busy = true;
+      var out = cards[idx], inn = cards[n];
+      idx = ((n % cards.length) + cards.length) % cards.length;
+      inn = cards[idx];
+      countEl.textContent = pad(idx) + ' / ' + pad(cards.length - 1).slice(-2);
+      if (reduced) {
+        out.classList.remove('active'); inn.classList.add('active'); busy = false; return;
+      }
+      gsap.to(out, { opacity: 0, y: -18 * dir, rotate: dir * 1.2, duration: .32, ease: 'power2.in', onComplete: function(){
+        out.classList.remove('active'); gsap.set(out, { clearProps: 'opacity,y,rotate' });
+        inn.classList.add('active');
+        gsap.fromTo(inn, { opacity: 0, y: 26 * dir, rotate: -dir * .8 }, { opacity: 1, y: 0, rotate: 0, duration: .5, ease: 'power3.out', onComplete: function(){ busy = false; } });
+      }});
+    }
+    document.getElementById('nextReport').addEventListener('click', function(){ show(idx + 1, 1); });
+    document.getElementById('prevReport').addEventListener('click', function(){ show(idx - 1, -1); });
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      var r = document.querySelector('.report').getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) show(idx + (e.key === 'ArrowRight' ? 1 : -1), e.key === 'ArrowRight' ? 1 : -1);
+    });
+  })();
+
+  // Ruler header: marker + chapter label track scroll across the whole page
+  var sections = Array.prototype.slice.call(document.querySelectorAll('[data-chap]'));
+  var marker = document.getElementById('marker');
+  var label = document.getElementById('chapLabel');
+  ScrollTrigger.create({
+    trigger: document.body, start: 'top top', end: 'bottom bottom',
+    onUpdate: function(self){
+      var p = self.progress;
+      marker.style.left = (p * 100) + '%';
+      label.style.left = (p * 100) + '%';
+      var idx = 0;
+      for (var i = 0; i < sections.length; i++) {
+        var r = sections[i].getBoundingClientRect();
+        if (r.top <= window.innerHeight * 0.4) idx = i;
+      }
+      var name = sections[idx].getAttribute('data-chap');
+      if (label.textContent !== name) label.textContent = name;
+    }
+  });
+})();
+
+// Booking modal: 4-step form, fake availability (GHL-style calendar), simulated email preview
+(function(){
+  var bd = document.getElementById('bookModal');
+  if (!bd) return;
+  var steps = bd.querySelectorAll('.m-step');
+  var count = document.getElementById('mCount');
+  var back = document.getElementById('mBack');
+  var next = document.getElementById('mNext');
+  var cur = 1, lastFocus = null;
+  var state = { name:'', email:'', phone:'', date:null, slot:null };
+
+  function open(){
+    lastFocus = document.activeElement;
+    bd.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    go(1);
+    setTimeout(function(){ var f = bd.querySelector('.m-step.active .m-input'); if (f) f.focus(); }, 280);
+  }
+  function close(){
+    bd.classList.remove('open');
+    document.body.style.overflow = '';
+    if (lastFocus) lastFocus.focus();
+  }
+  document.querySelectorAll('a.book, a.cta').forEach(function(a){
+    a.addEventListener('click', function(e){ e.preventDefault(); open(); });
+  });
+  document.getElementById('mClose').addEventListener('click', close);
+  bd.addEventListener('click', function(e){ if (e.target === bd) close(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && bd.classList.contains('open')) close(); });
+
+  function go(n){
+    cur = n;
+    steps.forEach(function(s){ s.classList.toggle('active', +s.dataset.step === n); });
+    count.textContent = 'Confirmed';
+    count.style.display = n === 5 ? '' : 'none';
+    document.querySelector('.m-progress').style.display = n === 5 ? 'none' : '';
+    var shown = Math.min(n, 4);
+    bd.querySelectorAll('.m-node').forEach(function(node){
+      node.classList.toggle('on', +node.dataset.n <= shown);
+    });
+    document.getElementById('mFill').style.width = ((shown - 1) / 3 * 100) + '%';
+    document.querySelector('.m-actions').style.display = n === 5 ? 'none' : '';
+    back.disabled = n === 1;
+    next.textContent = n === 4 ? 'Confirm booking' : 'Continue';
+    if (n === 4) renderConfirm();
+    if (n === 5) document.getElementById('mDoneWhen').textContent =
+      fmtDay.format(state.date) + ' at ' + state.slot + ' (' + tz + ')';
+  }
+  back.addEventListener('click', function(){ if (cur > 1 && cur < 5) go(cur - 1); });
+  next.addEventListener('click', function(){
+    if (cur === 1 && !validContact()) return;
+    if (cur === 2 && !validPhone()) return;
+    if (cur === 3 && (!state.date || !state.slot)) {
+      document.getElementById('errSlot').classList.add('show'); return;
+    }
+    if (cur === 4) { go(5); return; }
+    go(cur + 1);
+  });
+  // Enter inside a field advances, like a native form
+  bd.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('m-input')) {
+      e.preventDefault(); next.click();
+    }
+  });
+  // typing clears the error state for that field
+  ['mName','mEmail','mPhone'].forEach(function(id){
+    var el = document.getElementById(id);
+    el.addEventListener('input', function(){
+      el.classList.remove('bad');
+      var err = document.getElementById('err' + id.slice(1));
+      if (err) err.classList.remove('show');
+    });
+  });
+
+  function validContact(){
+    state.name = document.getElementById('mName').value.trim();
+    state.email = document.getElementById('mEmail').value.trim();
+    var okN = state.name.length >= 2;
+    var okE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email);
+    document.getElementById('errName').classList.toggle('show', !okN);
+    document.getElementById('errEmail').classList.toggle('show', !okE);
+    document.getElementById('mName').classList.toggle('bad', !okN);
+    document.getElementById('mEmail').classList.toggle('bad', !okE);
+    if (!okN) { document.getElementById('mName').focus(); return false; }
+    if (!okE) { document.getElementById('mEmail').focus(); return false; }
+    return true;
+  }
+  function validPhone(){
+    state.phone = document.getElementById('mPhone').value.replace(/\D/g, '');
+    var ok = state.phone.length >= 7;
+    document.getElementById('errPhone').classList.toggle('show', !ok);
+    document.getElementById('mPhone').classList.toggle('bad', !ok);
+    if (!ok) document.getElementById('mPhone').focus();
+    return ok;
+  }
+
+  // Calendar: GHL behavior. Month grid, blocked days disabled (past + weekends),
+  // slot list per day, availability stable per date via a seeded generator.
+  var tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || 'local').replace(/_/g, ' ');
+  document.getElementById('mTz').textContent = 'Times shown in ' + tz;
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var view = new Date(today.getFullYear(), today.getMonth(), 1);
+  var fmtDay = new Intl.DateTimeFormat('en-US', { weekday:'long', month:'long', day:'numeric' });
+  var fmtTime = new Intl.DateTimeFormat('en-US', { hour:'numeric', minute:'2-digit' });
+
+  function seeded(day){
+    var s = day.getFullYear() * 372 + day.getMonth() * 31 + day.getDate();
+    return function(){ s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  }
+  function isBlockedDay(d){ return d < today || d.getDay() === 0 || d.getDay() === 6; }
+  function slotsFor(d){
+    var r = seeded(d), out = [], now = new Date(), isToday = d.getTime() === today.getTime();
+    for (var h = 9; h < 17; h++) {
+      for (var m = 0; m < 60; m += 30) {
+        if (isToday && (h < now.getHours() + 1 || (h === now.getHours() + 1 && m < now.getMinutes()))) continue;
+        out.push({ h:h, m:m, open: r() > 0.35 });
+      }
+    }
+    return out;
+  }
+
+  function renderCal(){
+    document.getElementById('mMonth').textContent = view.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+    var cal = document.getElementById('mCal'); cal.innerHTML = '';
+    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(function(d){
+      var el = document.createElement('div'); el.className = 'm-dow'; el.textContent = d; cal.appendChild(el);
+    });
+    for (var i = 0; i < new Date(view.getFullYear(), view.getMonth(), 1).getDay(); i++) cal.appendChild(document.createElement('div'));
+    var days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    for (var d = 1; d <= days; d++) {
+      var date = new Date(view.getFullYear(), view.getMonth(), d);
+      var b = document.createElement('button'); b.className = 'm-day'; b.type = 'button'; b.textContent = d;
+      if (isBlockedDay(date)) { b.disabled = true; }
+      else {
+        b.addEventListener('click', (function(dt, btn){
+          return function(){
+            cal.querySelectorAll('.sel').forEach(function(x){ x.classList.remove('sel'); });
+            btn.classList.add('sel');
+            state.date = dt; state.slot = null;
+            document.getElementById('errSlot').classList.remove('show');
+            renderSlots(dt);
+          };
+        })(date, b));
+      }
+      if (state.date && date.getTime() === state.date.getTime()) b.classList.add('sel');
+      cal.appendChild(b);
+    }
+  }
+  function renderSlots(d){
+    var box = document.getElementById('mSlots'); box.innerHTML = '';
+    var list = slotsFor(d);
+    if (!list.length) { box.innerHTML = '<div class="m-empty">No times left on this day. Pick another.</div>'; return; }
+    list.forEach(function(s){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'm-slot';
+      b.textContent = fmtTime.format(new Date(d.getFullYear(), d.getMonth(), d.getDate(), s.h, s.m));
+      if (!s.open) { b.disabled = true; }
+      else b.addEventListener('click', function(){
+        box.querySelectorAll('.sel').forEach(function(x){ x.classList.remove('sel'); });
+        b.classList.add('sel'); state.slot = b.textContent;
+        document.getElementById('errSlot').classList.remove('show');
+      });
+      box.appendChild(b);
+    });
+  }
+  document.getElementById('mCalPrev').addEventListener('click', function(){
+    view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderCal();
+  });
+  document.getElementById('mCalNext').addEventListener('click', function(){
+    view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderCal();
+  });
+  renderCal();
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function renderConfirm(){
+    var when = fmtDay.format(state.date) + ' at ' + state.slot + ' (' + tz + ')';
+    function row(k, v){ return '<div class="m-sumrow"><b>' + k + '</b><span>' + v + '</span></div>'; }
+    document.getElementById('mSum').innerHTML =
+      row('Name', esc(state.name)) + row('Email', esc(state.email)) +
+      row('Phone', esc(state.phone)) + row('Session', esc(when));
+    document.getElementById('mailClientTo').textContent = state.email;
+    document.getElementById('mailAjTo').textContent = 'coach@djskyler.com (placeholder)';
+    var first = esc(state.name.split(' ')[0]);
+    document.getElementById('mailClient').innerHTML =
+      '<em>' + first + ',</em><br><br>Your 30-minute strategy session with DJ Skyler is confirmed for <b>' + esc(when) +
+      '</b>. He will call you at ' + esc(state.phone) + '. Come ready with your questions and any paperwork you have.<br><br>He educates, you decide. You file your own claim. No win, no fee.';
+    document.getElementById('mailAj').innerHTML =
+      '<b>New booking:</b> ' + esc(state.name) + '<br>When: ' + esc(when) + '<br>Email: ' + esc(state.email) +
+      '<br>Phone: ' + esc(state.phone) + '<br><br>Source: DJ Skyler landing page (demo)';
+  }
+})();
+</script>
+</body>
+</html>
