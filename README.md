@@ -1,6 +1,7 @@
-# Tenaci Portfolio
+# Tenaci Templates / Portfolio
 
-Client showcase sites. Each folder is self-contained (`index.html` + `assets/`) and deploys standalone.
+Source of truth for client showcase sites (private repo: `tenacitechnology/templates`).
+Each folder is self-contained (`index.html` + `assets/`) and deploys standalone.
 
 ## Sites
 - `j4v-top-coach/` — Live: https://tenaci-tech.com/portfolio/j4v-top-coach/
