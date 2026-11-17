@@ -97,6 +97,7 @@
   .pie-flex svg { width: 150px; height: 150px; flex-shrink: 0; }
   .pie-legend { list-style: none; flex: 1; min-width: 0; }
   .pie-legend li { display: flex; align-items: center; gap: 0.45rem; font-size: 0.7rem; font-weight: 700; padding: 0.16rem 0; }
+  .pie-legend .rk { width: 0.85rem; font-size: 0.62rem; font-weight: 800; color: var(--gray); font-variant-numeric: tabular-nums; flex-shrink: 0; }
   .pie-legend .dot { width: 0.55rem; height: 0.55rem; border-radius: 3px; flex-shrink: 0; }
   .pie-legend .pv { margin-left: auto; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
@@ -1037,10 +1038,12 @@
       n: "J4V — " + compact(TOTAL_VETS * eff / 100) + " served",
       v: j4vUnits, c: "#3e7a55"
     }]);
+    // bar-chart-race ordering: biggest slice first; J4V climbs the ranks as the % grows
+    items.sort(function (a, b) { return b.v - a.v; });
     var r = 66, C = 2 * Math.PI * r, offset = 0;
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     legend.innerHTML = "";
-    items.forEach(function (p) {
+    items.forEach(function (p, rank) {
       var seg = p.v / total * C;
       var ring = document.createElementNS(NS, "circle");
       ring.setAttribute("cx", 100); ring.setAttribute("cy", 100); ring.setAttribute("r", r);
@@ -1053,7 +1056,7 @@
       offset += seg;
       var li = document.createElement("li");
       var pct = p.v / total * 100;
-      li.innerHTML = '<span class="dot" style="background:' + p.c + '"></span>' + p.n +
+      li.innerHTML = '<span class="rk">' + (rank + 1) + '</span><span class="dot" style="background:' + p.c + '"></span>' + p.n +
         '<span class="pv">' + (pct < 2 ? pct.toFixed(1) : Math.round(pct)) + '%</span>';
       legend.appendChild(li);
     });
