@@ -1071,10 +1071,9 @@
     svg.appendChild(ct2);
   }
 
-  // ── Served-% control: drives bar, labels, and the four gap tiles ──
+  // ── Served-% control: drives bar, labels, tiles, and the pie ──
   var TOTAL_VETS = 17000000;
-  function updateGap() {
-    var pct = read($("gap-pct"), 0.01, 100);
+  function updateGap(pct) {
     var served = TOTAL_VETS * pct / 100;
     var unserved = TOTAL_VETS - served;
     var pctTxt = (pct % 1 === 0 ? pct : Math.round(pct * 100) / 100);
@@ -1087,6 +1086,24 @@
     $("g-unserved-sub").textContent = (Math.round((100 - pct) * 100) / 100) + "% waiting";
     $("gap-caption").textContent = "≈ " + Math.round(pct * 10) + " per 1,000 veterans — the bottleneck isn't demand, it's the sales engine in front of each coach.";
     renderPie(pct);
+  }
+
+  // Ladder the gap value toward its target so bar, tiles, and pie glide instead of snapping.
+  var gapAnim = { cur: 0.97, raf: null };
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function animateGap(target) {
+    if (gapAnim.raf) cancelAnimationFrame(gapAnim.raf);
+    if (REDUCED) { gapAnim.cur = target; updateGap(target); return; }
+    var start = gapAnim.cur, t0 = performance.now(), DUR = 900;
+    function tick(now) {
+      var t = Math.min((now - t0) / DUR, 1);
+      var e = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      gapAnim.cur = start + (target - start) * e;
+      updateGap(gapAnim.cur);
+      if (t < 1) gapAnim.raf = requestAnimationFrame(tick);
+      else { gapAnim.cur = target; updateGap(target); }
+    }
+    gapAnim.raf = requestAnimationFrame(tick);
   }
 
   // ── Calculator ──
@@ -1132,9 +1149,9 @@
   });
   $("chip-worst").addEventListener("click", function () { $("c-calls").value = 2; recalc(); });
   $("chip-best").addEventListener("click", function () { $("c-calls").value = 8; recalc(); });
-  $("gap-pct").addEventListener("input", updateGap);
+  $("gap-pct").addEventListener("input", function () { animateGap(read($("gap-pct"), 0.01, 100)); });
 
-  updateGap();
+  updateGap(gapAnim.cur);
   recalc();
 })();
 </script>
