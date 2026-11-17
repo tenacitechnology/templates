@@ -1015,24 +1015,32 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 
   // ── Competitor landscape pie (relative scale proxies from the competitor analysis session) ──
-  var PIE = [
+  // J4V's slice is sized to equal the served % from the gap control; competitors stay fixed.
+  var OTHERS = [
     { n: "Accredited VSOs (DAV, VFW, Legion) — free", v: 500, c: "#1e2a33" },
     { n: "VA Claims Insider", v: 50, c: "#3d6486" },
     { n: "Veterans Guardian", v: 15, c: "#4c5c3c" },
     { n: "Trajector Medical", v: 12, c: "#8a938b" },
     { n: "XTerra Health", v: 8, c: "#b9a06a" },
-    { n: "REE Medical", v: 5, c: "#c9ccd0" },
-    { n: "J4V", v: 5, c: "#3e7a55" }
+    { n: "REE Medical", v: 5, c: "#c9ccd0" }
   ];
-  function renderPie() {
+  function renderPie(servedPct) {
     var svg = $("marketPie"), legend = $("pieLegend");
     if (!svg || !legend) return;
     var NS = "http://www.w3.org/2000/svg";
-    var total = PIE.reduce(function (s, p) { return s + p.v; }, 0);
+    var eff = Math.min(Math.max(servedPct || 0, 0.01), 99.9);
+    var othersTotal = OTHERS.reduce(function (s, p) { return s + p.v; }, 0);
+    // size J4V so its slice equals exactly the served % of the pie
+    var j4vUnits = eff / (100 - eff) * othersTotal;
+    var total = othersTotal + j4vUnits;
+    var items = OTHERS.concat([{
+      n: "J4V — " + compact(TOTAL_VETS * eff / 100) + " served",
+      v: j4vUnits, c: "#3e7a55"
+    }]);
     var r = 66, C = 2 * Math.PI * r, offset = 0;
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     legend.innerHTML = "";
-    PIE.forEach(function (p) {
+    items.forEach(function (p) {
       var seg = p.v / total * C;
       var ring = document.createElementNS(NS, "circle");
       ring.setAttribute("cx", 100); ring.setAttribute("cy", 100); ring.setAttribute("r", r);
@@ -1049,7 +1057,6 @@
         '<span class="pv">' + (pct < 2 ? pct.toFixed(1) : Math.round(pct)) + '%</span>';
       legend.appendChild(li);
     });
-    var jv = PIE[PIE.length - 1].v / total * 100;
     var ct = document.createElementNS(NS, "text");
     ct.setAttribute("x", 100); ct.setAttribute("y", 96);
     ct.setAttribute("text-anchor", "middle");
@@ -1060,7 +1067,7 @@
     ct2.setAttribute("x", 100); ct2.setAttribute("y", 113);
     ct2.setAttribute("text-anchor", "middle");
     ct2.setAttribute("style", "font-size:10px;font-weight:700;fill:#5f6a60");
-    ct2.textContent = jv.toFixed(1) + "%";
+    ct2.textContent = (Math.round(eff * 100) / 100) + "%";
     svg.appendChild(ct2);
   }
 
@@ -1079,6 +1086,7 @@
     $("g-unserved-num").textContent = fmt(unserved);
     $("g-unserved-sub").textContent = (Math.round((100 - pct) * 100) / 100) + "% waiting";
     $("gap-caption").textContent = "≈ " + Math.round(pct * 10) + " per 1,000 veterans — the bottleneck isn't demand, it's the sales engine in front of each coach.";
+    renderPie(pct);
   }
 
   // ── Calculator ──
@@ -1126,7 +1134,6 @@
   $("chip-best").addEventListener("click", function () { $("c-calls").value = 8; recalc(); });
   $("gap-pct").addEventListener("input", updateGap);
 
-  renderPie();
   updateGap();
   recalc();
 })();
