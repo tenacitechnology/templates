@@ -79,13 +79,26 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.75rem; font-weight: 800; flex: 0 0 0.97%; position: relative;
   }
-  .bar-served span { position: absolute; left: 0.6rem; color: var(--ink); white-space: nowrap; font-size: 0.72rem; }
+  .bar-served span { position: absolute; left: 0.6rem; color: #4a5560; white-space: nowrap; font-size: 0.72rem; }
   .bar-open {
     background: var(--navy); color: #fff; flex: 1;
     display: flex; align-items: center; justify-content: flex-end; padding-right: 1rem;
     font-size: 0.78rem; font-weight: 700;
   }
   .bar-caption { font-size: 0.75rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.5rem; }
+
+  /* ── Gap interactives: served % input + competitor pie ── */
+  .gap-flex { display: grid; grid-template-columns: 1.35fr 1fr; gap: 0.9rem; }
+  .gap-input-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.7rem; }
+  .gap-input-row label { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); white-space: nowrap; }
+  .gap-input-row .calc-input { max-width: 110px; }
+  .pie-head { font-size: 0.85rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .pie-flex { display: flex; gap: 1rem; align-items: center; }
+  .pie-flex svg { width: 150px; height: 150px; flex-shrink: 0; }
+  .pie-legend { list-style: none; flex: 1; min-width: 0; }
+  .pie-legend li { display: flex; align-items: center; gap: 0.45rem; font-size: 0.7rem; font-weight: 700; padding: 0.16rem 0; }
+  .pie-legend .dot { width: 0.55rem; height: 0.55rem; border-radius: 3px; flex-shrink: 0; }
+  .pie-legend .pv { margin-left: auto; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   /* ── Output tiles ── */
   .math-op { text-align: center; }
@@ -340,6 +353,7 @@
     .flow { flex-direction: column; }
     .flow-arrow { transform: rotate(90deg); padding: 0.2rem 0; }
     .peek-grid { grid-template-columns: 1fr; }
+    .gap-flex { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -363,14 +377,14 @@
       <div class="gap-sub" style="color:var(--ink-soft)">Total addressable market</div>
     </div></div>
     <div class="bezel"><div class="bezel-inner">
-      <div class="gap-num num" style="color:var(--green)">165,000</div>
+      <div class="gap-num num" style="color:var(--green)" id="g-served-num">165,000</div>
       <div class="gap-lbl">Served by J4V today</div>
-      <div class="gap-sub" style="color:var(--green)">0.97% of the market</div>
+      <div class="gap-sub" style="color:var(--green)" id="g-served-sub">0.97% of the market</div>
     </div></div>
     <div class="bezel"><div class="bezel-inner">
-      <div class="gap-num num" style="color:var(--brick)">16,835,000</div>
+      <div class="gap-num num" style="color:var(--brick)" id="g-unserved-num">16,835,000</div>
       <div class="gap-lbl">Unserved</div>
-      <div class="gap-sub" style="color:var(--brick)">99.03% waiting</div>
+      <div class="gap-sub" style="color:var(--brick)" id="g-unserved-sub">99.03% waiting</div>
     </div></div>
     <div class="bezel"><div class="bezel-inner">
       <div class="gap-num num" style="color:var(--olive)">150</div>
@@ -378,16 +392,31 @@
       <div class="gap-sub" style="color:var(--ink-soft)">Independent contractors, 1099</div>
     </div></div>
   </div>
-  <div class="card" style="padding:1rem 1.2rem 1.1rem">
-    <div class="bar-track">
-      <div class="bar-served"><span>Served · 165K (0.97%)</span></div>
-      <div class="bar-open">Unserved · 16,835,000 veterans</div>
+  <div class="gap-flex">
+    <div class="card" style="padding:1rem 1.2rem 1.1rem">
+      <div class="bar-track">
+        <div class="bar-served" id="gap-bar" style="flex:0 0 0.97%"><span id="gap-bar-label">Served · 165K (0.97%)</span></div>
+        <div class="bar-open" id="gap-open">Unserved · 16,835,000 veterans</div>
+      </div>
+      <div class="gap-input-row">
+        <label for="gap-pct">Served by J4V (%)</label>
+        <input id="gap-pct" class="calc-input" type="number" min="0.01" max="100" step="0.01" value="0.97">
+      </div>
+      <div class="bar-caption" id="gap-caption">≈ 10 per 1,000 veterans — the bottleneck isn't demand, it's the sales engine in front of each coach.</div>
     </div>
-    <div class="bar-caption">For every 1,000 veterans, J4V reaches fewer than 10. The bottleneck isn't demand — it's the sales engine in front of each coach.</div>
+    <div class="card" style="padding:1rem 1.2rem 1.1rem">
+      <div class="pie-head">The competitive landscape</div>
+      <div class="pie-flex">
+        <svg id="marketPie" viewBox="0 0 200 200" role="img" aria-label="Relative scale of VA claims help competitors"></svg>
+        <ul class="pie-legend" id="pieLegend"></ul>
+      </div>
+      <div class="bar-caption">Relative scale of VA-claims-help players — proxy from public filings and claimed counts, not audited share. J4V is a rounding error next to the accredited VSOs.</div>
+    </div>
   </div>
 
   <!-- 2. WHAT THE ENGINE PRODUCES -->
-  <div class="sec-label"><span class="n">2</span><h2>What the engine produces</h2></div>
+  <div class="sec-label"><span class="n">2</span><h2>Projection Calculator</h2></div>
+  <p class="sub" style="margin:-0.3rem 0 0.9rem">Decide where you want to be. Know the moves. See where your team stands in 30 days or 12 months.</p>
 
   <div class="card">
     <div class="calc-grid">
@@ -465,8 +494,8 @@
     <!-- 12-month ramp chart at bottom of calculator -->
     <div class="chart-head">
       <div>
-        <h3>12-month ramp — cumulative veterans served</h3>
-        <span class="assump">Reacts live to the inputs above · coaches ramp 25% → 100% by month 6</span>
+        <h3>Annual projection</h3>
+        <span class="assump">5 years of service. 1 year of scale</span>
       </div>
       <div class="chart-badge">
         <div class="v num" id="ch-total">243,000</div>
@@ -481,7 +510,7 @@
   </div>
 
   <!-- TIER PLAN -->
-  <div class="sub-label"><span class="tick"></span><h3>The three tiers — capability only, no pricing</h3></div>
+  <div class="sub-label"><span class="tick"></span><h3>An Adaptive Solution, Priced to Scale</h3></div>
   <div class="tier-grid">
     <div class="tier-card tier-black">
       <div class="tier-metal-tag">Black Card</div>
@@ -546,7 +575,7 @@
       <div class="mini-card k-gold"></div>
     </div>
     <div class="channel-body">
-      <h3>A calling card in the coach's tier metal — tap, and the coach's page opens</h3>
+      <h3>The Handshake Card</h3>
       <p>Every tier ships with a physical NFC card in its finish — black, silver, or gold — laser-engraved with the coach's name. One tap from a phone opens the coach's personal page: story, credentials, reviews, and a booking button. No app. No typing. The card is the handshake; the page is the pitch.</p>
       <div class="channel-url">tenaci-tech.com/portfolio/j4v-top-coach/</div>
     </div>
@@ -555,7 +584,8 @@
   <!-- 3. THE PROBLEM -->
   <div class="sec-label"><span class="n">3</span><h2>The problem it solves</h2></div>
   <div class="card" style="padding:1rem 1.2rem;margin-bottom:0.9rem">
-    <span style="font-size:0.95rem;font-weight:800">A veteran who just received a denial letter fills out a form at 9:47 PM. What happens in the next five minutes decides whether J4V ever gets them — because they contacted three coaches, and only one answered.</span>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--brick);margin-bottom:0.4rem">Lack of Sales Channel</h3>
+    <p style="font-size:0.9rem;font-weight:600;color:var(--ink-soft);line-height:1.55">Veteran Coaches lose leads because they cannot respond to inquiries fast enough. When a prospect searched for multiple solutions, the first to answer typically wins the client.</p>
   </div>
   <div class="pain-grid">
     <div class="bezel"><div class="bezel-inner pain-card">
@@ -590,7 +620,7 @@
       <p>The veteran picks a real slot from the coach's actual availability. No ping-pong, no double-booking, reminders automatic. The coach just shows up.</p>
     </div></div>
     <div class="bezel"><div class="bezel-inner after-card">
-      <h3><span class="swatch"></span>Trusted before the first call</h3>
+      <h3><span class="swatch"></span>Rapport before the call</h3>
       <p>Reviews, credentials, and presence in search and AI answers do the convincing. The call starts warm, not cold.</p>
     </div></div>
   </div>
@@ -652,7 +682,7 @@
     </div>
 
     <!-- See it working — lives inside the engine -->
-    <div class="sub-label" style="margin-top:1.4rem"><span class="tick"></span><h3>See it working</h3></div>
+    <div class="sub-label" style="margin-top:1.4rem"><span class="tick"></span><h3>The Operating System</h3></div>
     <div class="peek-grid" style="margin-top:0">
       <div class="browser-frame">
         <div class="bf-bar">
@@ -735,7 +765,7 @@
       <p>Zero new headcount. Zero software burden on coaches. TenaciTech runs the engine, J4V keeps the coaching relationship.</p>
     </div>
     <div class="rev-items">
-      <div class="rev-item"><div class="v num">SaaS</div><div class="l">Per coach / month</div></div>
+      <div class="rev-item"><div class="v num">SaaS</div><div class="l">Software as a Service · per coach / month</div></div>
       <div class="rev-item"><div class="v num" id="rev-coaches">150</div><div class="l">Engines day one</div></div>
       <div class="rev-item"><div class="v num" id="rev-conv">24K</div><div class="l">Claims / mo potential</div></div>
     </div>
@@ -984,6 +1014,73 @@
   $("modal").addEventListener("click", function (e) { if (e.target.id === "modal") closeModal(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 
+  // ── Competitor landscape pie (relative scale proxies from the competitor analysis session) ──
+  var PIE = [
+    { n: "Accredited VSOs (DAV, VFW, Legion) — free", v: 500, c: "#1e2a33" },
+    { n: "VA Claims Insider", v: 50, c: "#3d6486" },
+    { n: "Veterans Guardian", v: 15, c: "#4c5c3c" },
+    { n: "Trajector Medical", v: 12, c: "#8a938b" },
+    { n: "XTerra Health", v: 8, c: "#b9a06a" },
+    { n: "REE Medical", v: 5, c: "#c9ccd0" },
+    { n: "J4V", v: 5, c: "#3e7a55" }
+  ];
+  function renderPie() {
+    var svg = $("marketPie"), legend = $("pieLegend");
+    if (!svg || !legend) return;
+    var NS = "http://www.w3.org/2000/svg";
+    var total = PIE.reduce(function (s, p) { return s + p.v; }, 0);
+    var r = 66, C = 2 * Math.PI * r, offset = 0;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    legend.innerHTML = "";
+    PIE.forEach(function (p) {
+      var seg = p.v / total * C;
+      var ring = document.createElementNS(NS, "circle");
+      ring.setAttribute("cx", 100); ring.setAttribute("cy", 100); ring.setAttribute("r", r);
+      ring.setAttribute("fill", "none"); ring.setAttribute("stroke", p.c);
+      ring.setAttribute("stroke-width", "34");
+      ring.setAttribute("stroke-dasharray", Math.max(seg - 1.5, 0.5) + " " + (C - Math.max(seg - 1.5, 0.5)));
+      ring.setAttribute("stroke-dashoffset", -offset);
+      ring.setAttribute("transform", "rotate(-90 100 100)");
+      svg.appendChild(ring);
+      offset += seg;
+      var li = document.createElement("li");
+      var pct = p.v / total * 100;
+      li.innerHTML = '<span class="dot" style="background:' + p.c + '"></span>' + p.n +
+        '<span class="pv">' + (pct < 2 ? pct.toFixed(1) : Math.round(pct)) + '%</span>';
+      legend.appendChild(li);
+    });
+    var jv = PIE[PIE.length - 1].v / total * 100;
+    var ct = document.createElementNS(NS, "text");
+    ct.setAttribute("x", 100); ct.setAttribute("y", 96);
+    ct.setAttribute("text-anchor", "middle");
+    ct.setAttribute("style", "font-size:15px;font-weight:800;fill:#1c2420");
+    ct.textContent = "J4V";
+    svg.appendChild(ct);
+    var ct2 = document.createElementNS(NS, "text");
+    ct2.setAttribute("x", 100); ct2.setAttribute("y", 113);
+    ct2.setAttribute("text-anchor", "middle");
+    ct2.setAttribute("style", "font-size:10px;font-weight:700;fill:#5f6a60");
+    ct2.textContent = jv.toFixed(1) + "%";
+    svg.appendChild(ct2);
+  }
+
+  // ── Served-% control: drives bar, labels, and the four gap tiles ──
+  var TOTAL_VETS = 17000000;
+  function updateGap() {
+    var pct = read($("gap-pct"), 0.01, 100);
+    var served = TOTAL_VETS * pct / 100;
+    var unserved = TOTAL_VETS - served;
+    var pctTxt = (pct % 1 === 0 ? pct : Math.round(pct * 100) / 100);
+    $("gap-bar").style.flexBasis = Math.max(pct, 0.5) + "%";
+    $("gap-bar-label").textContent = "Served · " + compact(served) + " (" + pctTxt + "%)";
+    $("gap-open").textContent = "Unserved · " + fmt(unserved) + " veterans";
+    $("g-served-num").textContent = fmt(served);
+    $("g-served-sub").textContent = pctTxt + "% of the market";
+    $("g-unserved-num").textContent = fmt(unserved);
+    $("g-unserved-sub").textContent = (Math.round((100 - pct) * 100) / 100) + "% waiting";
+    $("gap-caption").textContent = "≈ " + Math.round(pct * 10) + " per 1,000 veterans — the bottleneck isn't demand, it's the sales engine in front of each coach.";
+  }
+
   // ── Calculator ──
   function recalc() {
     var coaches = read($("c-coaches"), 1, 100000);
@@ -1027,7 +1124,10 @@
   });
   $("chip-worst").addEventListener("click", function () { $("c-calls").value = 2; recalc(); });
   $("chip-best").addEventListener("click", function () { $("c-calls").value = 8; recalc(); });
+  $("gap-pct").addEventListener("input", updateGap);
 
+  renderPie();
+  updateGap();
   recalc();
 })();
 </script>
