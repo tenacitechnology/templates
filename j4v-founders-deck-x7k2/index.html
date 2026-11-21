@@ -79,7 +79,7 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.75rem; font-weight: 800; flex: 0 0 0.97%; position: relative;
   }
-  .bar-served span { position: absolute; left: 0.6rem; color: #4a5560; white-space: nowrap; font-size: 0.72rem; }
+  .bar-served span { position: absolute; left: 0.6rem; color: #e6eae4; white-space: nowrap; font-size: 0.72rem; }
   .bar-open {
     background: var(--navy); color: #fff; flex: 1;
     display: flex; align-items: center; justify-content: flex-end; padding-right: 1rem;
@@ -107,6 +107,13 @@
   .math-lbl { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-top: 0.2rem; }
   .math-note { font-size: 0.76rem; font-weight: 600; color: var(--ink-soft); margin-top: 0.3rem; line-height: 1.4; }
 
+  /* ── Number ticker (odometer roll for calculator outputs) ── */
+  .tk { display: inline-block; white-space: nowrap; }
+  .tk-char { display: inline-block; height: 1em; line-height: 1em; overflow: hidden; vertical-align: bottom; }
+  .tk-char.tk-static { overflow: visible; }
+  .tk-strip { display: flex; flex-direction: column; will-change: transform; transition-property: transform; transition-timing-function: var(--ease); }
+  .tk-strip > span { display: block; height: 1em; line-height: 1em; text-align: center; }
+
   /* ── Calculator ── */
   .calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.9rem; align-items: stretch; }
   .calc-field { display: flex; flex-direction: column; justify-content: flex-end; }
@@ -125,12 +132,16 @@
     color: var(--ink); cursor: pointer; transition: background 0.2s var(--ease), color 0.2s var(--ease);
   }
   .chip:hover { background: #e2e5d9; }
+  .chip:focus-visible, .engine-step:focus-visible, .tier-toggle:focus-visible, .modal-close:focus-visible {
+    outline: 2px solid var(--olive); outline-offset: 2px;
+  }
   .chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
   .assump { font-size: 0.72rem; color: var(--ink-soft); font-weight: 600; line-height: 1.5; }
   .calc-outs { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 0.9rem; margin-top: 1rem; }
 
   /* ── Projection chart ── */
   .chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin: 1.4rem 0 0.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+
   .chart-head h3 { font-size: 0.95rem; font-weight: 800; }
   .chart-badge { text-align: right; }
   .chart-badge .v { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--green); font-variant-numeric: tabular-nums; }
@@ -147,7 +158,7 @@
   @keyframes chPulse { 0% { r: 5; opacity: 0.5; } 100% { r: 14; opacity: 0; } }
 
   /* ── Tier metal cards ── */
-  .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.9rem; align-items: stretch; }
+  .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.9rem; align-items: start; }
   .tier-card { position: relative; border-radius: 16px; padding: 1.35rem 1.4rem 1.25rem; overflow: hidden; display: flex; flex-direction: column; }
   .tier-card::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -164,13 +175,32 @@
   .nfc-row { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.7rem; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
   .tier-feats { list-style: none; margin-top: 0.85rem; flex: 1; }
   .tier-feats li { font-size: 0.78rem; font-weight: 600; line-height: 1.45; padding: 0.22rem 0 0.22rem 1.05rem; position: relative; }
-  .tier-feats li::before { content: ""; position: absolute; left: 0; top: 0.62rem; width: 0.42rem; height: 0.42rem; background: currentColor; opacity: 0.55; clip-path: polygon(50% 0%, 63% 35%, 98% 35%, 70% 57%, 81% 91%, 50% 70%, 19% 91%, 30% 57%, 2% 35%, 37% 35%); }
   .tier-feats li.tier-plus { font-weight: 800; }
   .tier-ribbon {
     position: absolute; top: 0.9rem; right: -2.1rem; transform: rotate(38deg);
     background: var(--navy); color: #f0dfa8; font-size: 0.58rem; font-weight: 800;
     letter-spacing: 0.12em; text-transform: uppercase; padding: 0.2rem 2.4rem;
   }
+
+  /* ── Tier expandable: spring expand from summary bullet (Motion physics) ── */
+  .tier-card { cursor: pointer; transition: transform 0.25s var(--ease), box-shadow 0.3s var(--ease); }
+  .tier-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(28,36,32,0.14); }
+  .tier-card.open { box-shadow: 0 14px 36px rgba(28,36,32,0.16); }
+  .tier-more { height: 0; overflow: hidden; }
+  .tier-more .tier-feats { margin-top: 0; flex: none; }
+  .tier-feats li.ti { display: flex; align-items: flex-start; gap: 0.55rem; padding-left: 0; }
+  .tier-feats li.ti::before { display: none; }
+  .tic { width: 0.85rem; height: 0.85rem; flex-shrink: 0; margin-top: 0.14rem; opacity: 0.65; }
+  .tier-toggle {
+    font: inherit; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+    color: inherit; background: transparent; border: 1px solid currentColor; border-radius: 999px;
+    padding: 0.35rem 0.9rem; margin-top: 0.9rem; cursor: pointer; opacity: 0.75; align-self: flex-start;
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    transition: opacity 0.2s var(--ease);
+  }
+  .tier-toggle:hover { opacity: 1; }
+  .tier-toggle .plus { display: inline-block; font-size: 0.95rem; line-height: 1; font-weight: 800; transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .tier-card.open .tier-toggle .plus { transform: rotate(45deg); }
 
   /* ── Problem section ── */
   .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 0.9rem; margin-bottom: 0.9rem; }
@@ -518,34 +548,48 @@
       <div class="tier-name">DEPLOY</div>
       <div class="tier-tagline">Establish your position.</div>
       <div class="nfc-row">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 9a10 10 0 0 1 14 0"/><path d="M8.5 12.5a5.5 5.5 0 0 1 7 0"/><circle cx="12" cy="16.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.32a7.43 7.43 0 0 1 0 7.36" /> <path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58" /> <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8" /> <path d="M16.37 2a20.16 20.16 0 0 1 0 20" /></svg>
         NFC calling card included
       </div>
       <ul class="tier-feats">
-        <li class="tier-plus">Everything a coach needs to be findable and bookable</li>
-        <li>Animated website + blog</li>
-        <li>Booking form + calendar</li>
-        <li>Fixed email sequence</li>
-        <li>Trust wall — reviews, testimonials, credentials storytelling</li>
-        <li>Service-area map + Google Business Profile setup</li>
+        <li class="tier-plus ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg><span>Everything a coach needs to be findable and bookable</span></li>
       </ul>
+      <div class="tier-more" id="tier-more-deploy" aria-hidden="true">
+        <div class="tier-more-inner">
+          <ul class="tier-feats">
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></svg><span>Animated website + blog</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v3" /> <path d="M16 2v3" /> <rect x="3" y="3" width="18" height="18" rx="2" /> <path d="M3 9h18" /> <path d="m9 15 2 2 4-4" /></svg><span>Booking form + calendar</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /></svg><span>Fixed email sequence</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /> <path d="m9 12 2 2 4-4" /></svg><span>Trust wall — reviews, testimonials, credentials storytelling</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></svg><span>Service-area map + Google Business Profile setup</span></li>
+          </ul>
+        </div>
+      </div>
+      <button class="tier-toggle" type="button" aria-expanded="false" aria-controls="tier-more-deploy"><span class="plus" aria-hidden="true">+</span><span class="tier-toggle-label">5 more features</span></button>
     </div>
     <div class="tier-card tier-silver">
       <div class="tier-metal-tag">Silver Card</div>
       <div class="tier-name">ENGAGE</div>
       <div class="tier-tagline">Every lead answered. Every channel.</div>
       <div class="nfc-row">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 9a10 10 0 0 1 14 0"/><path d="M8.5 12.5a5.5 5.5 0 0 1 7 0"/><circle cx="12" cy="16.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.32a7.43 7.43 0 0 1 0 7.36" /> <path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58" /> <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8" /> <path d="M16.37 2a20.16 20.16 0 0 1 0 20" /></svg>
         NFC calling card included
       </div>
       <ul class="tier-feats">
-        <li class="tier-plus">Everything in Deploy, plus:</li>
-        <li>Alter-ego email replies — answers in the coach's voice, under a minute</li>
-        <li>Website chatbot + SMS chatbot</li>
-        <li>Speed-to-lead on every inquiry</li>
-        <li>Review activation — the trust wall grows itself</li>
-        <li>Automated booking — one availability pool, no double-booking</li>
+        <li class="tier-plus ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg><span>Everything in Deploy, plus:</span></li>
       </ul>
+      <div class="tier-more" id="tier-more-engage" aria-hidden="true">
+        <div class="tier-more-inner">
+          <ul class="tier-feats">
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></svg><span>Alter-ego email replies — answers in the coach's voice, under a minute</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /> <path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1" /></svg><span>Website chatbot + SMS chatbot</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z" /></svg><span>Speed-to-lead on every inquiry</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></svg><span>Review activation — the trust wall grows itself</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 2v3" /> <path d="M17 15.5v1.7l1 .625" /> <path d="M21 8.936V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h3.935" /> <path d="M3 9h9.873" /> <path d="M8 2v3" /> <circle cx="17" cy="17" r="5" /></svg><span>Automated booking — one availability pool, no double-booking</span></li>
+          </ul>
+        </div>
+      </div>
+      <button class="tier-toggle" type="button" aria-expanded="false" aria-controls="tier-more-engage"><span class="plus" aria-hidden="true">+</span><span class="tier-toggle-label">5 more features</span></button>
     </div>
     <div class="tier-card tier-gold">
       <div class="tier-ribbon">Flagship</div>
@@ -553,17 +597,24 @@
       <div class="tier-name">OVERWATCH</div>
       <div class="tier-tagline">Eyes everywhere. Nothing missed.</div>
       <div class="nfc-row">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 9a10 10 0 0 1 14 0"/><path d="M8.5 12.5a5.5 5.5 0 0 1 7 0"/><circle cx="12" cy="16.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.32a7.43 7.43 0 0 1 0 7.36" /> <path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58" /> <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8" /> <path d="M16.37 2a20.16 20.16 0 0 1 0 20" /></svg>
         NFC calling card included
       </div>
       <ul class="tier-feats">
-        <li class="tier-plus">Everything in Engage, plus:</li>
-        <li>Voice AI on the website</li>
-        <li>Voice speed-to-lead — answers the call itself</li>
-        <li>GEO / SEO — cited in search and AI answers</li>
-        <li>Google Business Profile optimization</li>
-        <li>Map pack + AI-answer visibility</li>
+        <li class="tier-plus ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg><span>Everything in Engage, plus:</span></li>
       </ul>
+      <div class="tier-more" id="tier-more-overwatch" aria-hidden="true">
+        <div class="tier-more-inner">
+          <ul class="tier-feats">
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19v3" /> <path d="M19 10v2a7 7 0 0 1-14 0v-2" /> <rect x="9" y="2" width="6" height="13" rx="3" /></svg><span>Voice AI on the website</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2a9 9 0 0 1 9 9" /> <path d="M13 6a5 5 0 0 1 5 5" /> <path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" /></svg><span>Voice speed-to-lead — answers the call itself</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></svg><span>GEO / SEO — cited in search and AI answers</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5" /> <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244" /> <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05" /></svg><span>Google Business Profile optimization</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34" /> <path d="M4 6h.01" /> <path d="M2.29 9.62A10 10 0 1 0 21.31 8.35" /> <path d="M16.24 7.76A6 6 0 1 0 8.23 16.67" /> <path d="M12 18h.01" /> <path d="M17.99 11.66A6 6 0 0 1 15.77 16.67" /> <circle cx="12" cy="12" r="2" /> <path d="m13.41 10.59 5.66-5.66" /></svg><span>Map pack + AI-answer visibility</span></li>
+          </ul>
+        </div>
+      </div>
+      <button class="tier-toggle" type="button" aria-expanded="false" aria-controls="tier-more-overwatch"><span class="plus" aria-hidden="true">+</span><span class="tier-toggle-label">5 more features</span></button>
     </div>
   </div>
 
@@ -791,6 +842,7 @@
 
 <footer>Prepared for J4V founder presentation. Engine = GoHighLevel sub-accounts fully managed by TenaciTech; coaches see only their portal. Tier names: Deploy / Engage / Overwatch — Black / Silver / Gold.</footer>
 
+<script src="assets/motion.mini.js"></script>
 <script>
 (function () {
   var WORK_DAYS = 20;
@@ -930,7 +982,7 @@
       chartAnimated = true;
     }
 
-    $("ch-total").textContent = fmt(cum);
+    setNum("ch-total", fmt(cum));
   }
 
   // ── Engine step modals (animated demos; swap stage innerHTML for a <video> when footage lands) ──
@@ -990,8 +1042,8 @@
       title: "Hot lead alerts to coach",
       tier: "Engage",
       desc: "High-intent signals — repeated opens, pricing questions, clicked booking links — trigger an alert to the coach: who, what they asked, and the suggested next move. The coach spends minutes on the leads most likely to close.",
-      stage: '<div class="demo-el d-loop" style="left:8%;top:14%"><div class="demo-chip">🔥 Marcus R. asked about pricing · opened 3 emails</div></div>' +
-             '<div class="demo-el d-loop d2" style="left:8%;top:46%"><div class="demo-chip">🔥 Tanya W. clicked booking link twice</div></div>' +
+      stage: '<div class="demo-el d-loop" style="left:8%;top:14%"><div class="demo-chip"><svg style="width:0.75rem;height:0.75rem;vertical-align:-0.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" /></svg> Marcus R. asked about pricing · opened 3 emails</div></div>' +
+             '<div class="demo-el d-loop d2" style="left:8%;top:46%"><div class="demo-chip"><svg style="width:0.75rem;height:0.75rem;vertical-align:-0.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" /></svg> Tanya W. clicked booking link twice</div></div>' +
              '<div class="demo-el d-loop d3" style="left:8%;top:78%"><div class="demo-chip" style="color:var(--green);border-color:#bcd8be">✓ Suggested: call now</div></div>'
     }
   };
@@ -1109,6 +1161,100 @@
     gapAnim.raf = requestAnimationFrame(tick);
   }
 
+  // ── Number ticker: calculator outputs roll digit-by-digit (odometer; higher places settle later) ──
+  // recalc owns the model; setNum owns the display transition.
+  // a11y: full text via aria-label; animated layer aria-hidden; reduced-motion → instant text.
+  var TK_DUR = 700;    // ms for a digit to roll
+  var TK_STAGGER = 55; // ms extra settle per higher place (leftmost settles last)
+  var tkState = new WeakMap();
+  var tkIO = ("IntersectionObserver" in window && !REDUCED) ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var st = tkState.get(en.target);
+      if (st && st.pending) { st.pending = false; applyTicker(en.target, st.text, true); }
+      tkIO.unobserve(en.target);
+    });
+  }, { threshold: 0.4 }) : null;
+
+  // First render rolls up from 0 when scrolled into view; later renders roll from the previous value.
+  function setNum(id, text) {
+    var el = $(id);
+    if (!el) return;
+    var st = tkState.get(el);
+    if (!st) {
+      st = { text: "", pending: false };
+      tkState.set(el, st);
+      if (tkIO) {
+        st.pending = true;
+        st.text = text;
+        el.textContent = text;
+        el.setAttribute("aria-label", text);
+        tkIO.observe(el);
+        return;
+      }
+      applyTicker(el, text, true);
+      return;
+    }
+    // A later setNum means the model moved (user input) — reveal now even if IO hasn't fired.
+    if (st.pending) { st.pending = false; if (tkIO) tkIO.unobserve(el); applyTicker(el, text, true); return; }
+    if (st.text !== text) applyTicker(el, text, false);
+  }
+
+  function applyTicker(el, text, initial) {
+    var st = tkState.get(el);
+    var oldText = initial ? "" : st.text;
+    st.text = text;
+    el.setAttribute("aria-label", text);
+    if (REDUCED) { el.textContent = text; return; }
+
+    var oldChars = oldText.split(""), newChars = text.split("");
+    var maxLen = Math.max(oldChars.length, newChars.length);
+    while (oldChars.length < maxLen) oldChars.unshift("");
+    while (newChars.length < maxLen) newChars.unshift("");
+
+    var digitPlaces = [];
+    newChars.forEach(function (c, i) { if (/\d/.test(c)) digitPlaces.push(i); });
+
+    var wrap = document.createElement("span");
+    wrap.className = "tk";
+    wrap.setAttribute("aria-hidden", "true");
+
+    newChars.forEach(function (c, i) {
+      if (c === "") return;
+      if (!/\d/.test(c)) {
+        var s = document.createElement("span");
+        s.className = "tk-char tk-static";
+        s.textContent = c;
+        wrap.appendChild(s);
+        return;
+      }
+      var box = document.createElement("span");
+      box.className = "tk-char";
+      var strip = document.createElement("span");
+      strip.className = "tk-strip";
+      var html = "";
+      for (var k = 0; k < 20; k++) html += "<span>" + (k % 10) + "</span>";
+      strip.innerHTML = html;
+      var from = /\d/.test(oldChars[i]) ? +oldChars[i] : 0;
+      strip.style.transitionDuration = "0s";
+      strip.style.transform = "translateY(-" + from + "em)";
+      var place = digitPlaces.indexOf(i);
+      var delay = (digitPlaces.length - 1 - place) * TK_STAGGER;
+      var target = from + ((+c - from + 10) % 10);
+      box.appendChild(strip);
+      wrap.appendChild(box);
+      // Commit start position synchronously (forced reflow), then transition to target —
+      // rAF-gated kicks silently never run where compositor frames don't fire.
+      strip.getBoundingClientRect();
+      strip.style.transitionDelay = delay + "ms";
+      strip.style.transitionDuration = TK_DUR + "ms";
+      strip.style.transform = "translateY(-" + target + "em)";
+    });
+
+    el.textContent = "";
+    el.appendChild(wrap);
+  }
+
   // ── Calculator ──
   function recalc() {
     var coaches = read($("c-coaches"), 1, 100000);
@@ -1122,20 +1268,20 @@
     var grossMo = m.totalConv * benefit * 5;
     var netYr = grossMo * 12 * (1 - share / 100);
 
-    $("o-leads-coach").textContent = m.leadsCoach >= 10 ? compact(m.leadsCoach) : m.leadsCoach.toFixed(1);
+    setNum("o-leads-coach", m.leadsCoach >= 10 ? compact(m.leadsCoach) : m.leadsCoach.toFixed(1));
     $("o-booked-note").textContent = fmt(m.booked) + " interested (" + (rate % 1 === 0 ? rate : rate.toFixed(1)) + "%)";
-    $("o-capacity").textContent = fmt(m.capacity);
-    $("o-converted-coach").textContent = m.convCoach >= 10 ? compact(m.convCoach) : m.convCoach.toFixed(1);
+    setNum("o-capacity", fmt(m.capacity));
+    setNum("o-converted-coach", m.convCoach >= 10 ? compact(m.convCoach) : m.convCoach.toFixed(1));
     var capped = m.booked > m.capacity;
     $("o-cap-note").textContent = capped ? "Capped — " + fmt(m.booked - m.capacity) + " interested unserved" : "All interested served";
-    $("o-total-converted").textContent = fmt(m.totalConv);
+    setNum("o-total-converted", fmt(m.totalConv));
     $("o-conv-cap-note").textContent = capped
       ? fmt(m.booked * coaches - m.totalConv) + " veterans interested but unserved"
       : "All interested served";
-    $("o-monthly").textContent = money(grossMo);
-    $("o-share").textContent = money(grossMo * share / 100 / coaches);
+    setNum("o-monthly", money(grossMo));
+    setNum("o-share", money(grossMo * share / 100 / coaches));
     $("o-share-note").textContent = share + "% pool ÷ " + fmt(coaches) + " coaches";
-    $("o-annual").textContent = money(netYr);
+    setNum("o-annual", money(netYr));
     $("o-annual-note").textContent = "after " + share + "% coach share";
 
     renderChart(m.totalConv);
@@ -1153,6 +1299,57 @@
   $("chip-worst").addEventListener("click", function () { $("c-calls").value = 2; recalc(); });
   $("chip-best").addEventListener("click", function () { $("c-calls").value = 8; recalc(); });
   $("gap-pct").addEventListener("input", function () { animateGap(read($("gap-pct"), 0.01, 100)); });
+
+  // ── Tier cards: spring expand from summary bullet (Motion physics; instant fallback) ──
+  var hasMotion = typeof Motion !== "undefined" && !!Motion.animate;
+  document.querySelectorAll(".tier-card").forEach(function (card) {
+    var btn = card.querySelector(".tier-toggle");
+    var more = card.querySelector(".tier-more");
+    var inner = card.querySelector(".tier-more-inner");
+    var label = card.querySelector(".tier-toggle-label");
+    if (!btn || !more || !inner || !label) return;
+    var items = inner.querySelectorAll("li");
+    var count = items.length;
+    var anim = null;
+
+    function setState(open) {
+      card.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      more.setAttribute("aria-hidden", String(!open));
+      label.textContent = open ? "Show less" : count + " more features";
+    }
+    function stopAnim() { if (anim) { anim.stop(); anim = null; } }
+
+    function expand() {
+      setState(true);
+      if (REDUCED || !hasMotion) {
+        more.style.height = "auto";
+        return;
+      }
+      stopAnim();
+      var target = inner.scrollHeight;
+      var mine = anim = Motion.animate(more, { height: [more.getBoundingClientRect().height, target] },
+        { type: "spring", stiffness: 300, damping: 30 });
+      mine.then(function () { if (anim === mine) more.style.height = "auto"; });
+      items.forEach(function (li, i) {
+        Motion.animate(li,
+          { opacity: [0, 1], transform: ["translateY(10px) scale(0.97)", "translateY(0px) scale(1)"] },
+          { type: "spring", stiffness: 420, damping: 28, delay: 0.07 + i * 0.05 });
+      });
+    }
+    function collapse() {
+      setState(false);
+      if (REDUCED || !hasMotion) { more.style.height = "0px"; return; }
+      stopAnim();
+      more.style.height = more.getBoundingClientRect().height + "px"; // pin auto before spring
+      var mine = anim = Motion.animate(more, { height: 0 }, { type: "spring", stiffness: 340, damping: 34 });
+      mine.then(function () { if (anim === mine) more.style.height = "0px"; });
+    }
+    function toggle() { card.classList.contains("open") ? collapse() : expand(); }
+
+    btn.addEventListener("click", function (e) { e.stopPropagation(); toggle(); });
+    card.addEventListener("click", toggle);
+  });
 
   updateGap(gapAnim.cur);
   recalc();
