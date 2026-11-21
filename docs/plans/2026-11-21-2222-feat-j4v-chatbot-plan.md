@@ -101,6 +101,8 @@ The page is one-way. Visitors make the booking decision with questions the page 
 
 - Q1 (blocking for U1): Which GHL location hosts the bot and calendar — the agency demo location or a new J4V-dedicated location. Assumed: a new J4V-dedicated location under the agency account, so leads are clean.
 - Q2 (check during U1): Whether the agency plan includes the Conversation AI add-on or it must be enabled per location.
+- Q3 (resolve during U4): What does DJ Skyler personally deliver versus the site-wide Just4Veterans services in the KB? Needed to finalize the R4b attribution rule in the bot prompt.
+- Q4 (post-launch): Who owns compliance spot-checks and KB re-crawls, and on what trigger? The risk table flags KB staleness and non-deterministic prompt drift but assigns no owner or cadence after Definition of Done.
 
 ### Sources
 
