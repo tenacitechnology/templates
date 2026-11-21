@@ -618,24 +618,24 @@
 
     <div class="m-step" data-step="4">
       <div class="m-title">Confirm the <em class="serif">details.</em></div>
-      <div class="m-sub">REVIEW / WHAT GETS SENT</div>
+      <div class="m-sub">REVIEW / EMAIL PREVIEW (NOT SENT)</div>
       <div class="m-sum" id="mSum"></div>
       <div class="m-mail">
-        <div class="m-mailhead">TO: <b id="mailClientTo"></b><br>SUBJECT: <b>Your strategy session is on the books</b></div>
+        <div class="m-mailhead">TO: <b id="mailClientTo"></b><br>SUBJECT: <b>Your strategy session — demo preview</b></div>
         <div class="m-mailbody" id="mailClient"></div>
       </div>
       <div class="m-mail">
-        <div class="m-mailhead">TO: <b id="mailAjTo"></b><br>SUBJECT: <b>New booking / strategy session</b></div>
+        <div class="m-mailhead">TO: <b id="mailAjTo"></b><br>SUBJECT: <b>New booking / strategy session — demo preview</b></div>
         <div class="m-mailbody" id="mailAj"></div>
       </div>
     </div>
 
     <div class="m-step" data-step="5">
       <div class="m-count">Step 04 / 04</div>
-      <div class="m-done-title">You are on the books.</div>
-      <div class="m-sub">CONFIRMATION PREVIEWED FOR BOTH PARTIES / DEMO</div>
+      <div class="m-done-title">Preview only — nothing was booked.</div>
+      <div class="m-sub">DEMO PREVIEW / NO APPOINTMENT IS CREATED / NOTHING WAS SENT</div>
       <div class="m-mailbody" id="mDoneWhen" style="font-size:15px"></div>
-      <div class="m-stamp">Session locked</div>
+      <div class="m-stamp">Demo preview</div>
     </div>
 
     <div class="m-actions">
@@ -860,7 +860,7 @@
   });
 })();
 
-// Booking modal: 4-step form, fake availability (GHL-style calendar), simulated email preview
+// Booking modal: 4-step demo preview (R7) — fake availability (GHL-style calendar), preview emails only, no booking created
 (function(){
   var bd = document.getElementById('bookModal');
   if (!bd) return;
@@ -893,7 +893,7 @@
   function go(n){
     cur = n;
     steps.forEach(function(s){ s.classList.toggle('active', +s.dataset.step === n); });
-    count.textContent = 'Confirmed';
+    count.textContent = 'Preview only';
     count.style.display = n === 5 ? '' : 'none';
     document.querySelector('.m-progress').style.display = n === 5 ? 'none' : '';
     var shown = Math.min(n, 4);
@@ -903,7 +903,7 @@
     document.getElementById('mFill').style.width = ((shown - 1) / 3 * 100) + '%';
     document.querySelector('.m-actions').style.display = n === 5 ? 'none' : '';
     back.disabled = n === 1;
-    next.textContent = n === 4 ? 'Confirm booking' : 'Continue';
+    next.textContent = n === 4 ? 'Preview confirmation' : 'Continue';
     if (n === 4) renderConfirm();
     if (n === 5) document.getElementById('mDoneWhen').textContent =
       fmtDay.format(state.date) + ' at ' + state.slot + ' (' + tz + ')';
@@ -1043,8 +1043,8 @@
     document.getElementById('mailAjTo').textContent = 'coach@djskyler.com (placeholder)';
     var first = esc(state.name.split(' ')[0]);
     document.getElementById('mailClient').innerHTML =
-      '<em>' + first + ',</em><br><br>Your 30-minute strategy session with DJ Skyler is confirmed for <b>' + esc(when) +
-      '</b>. He will call you at ' + esc(state.phone) + '. Come ready with your questions and any paperwork you have.<br><br>He educates, you decide. You file your own claim. No win, no fee.';
+      '<em>' + first + ',</em><br><br>This is a demo preview of the confirmation email for <b>' + esc(when) +
+      '</b>. No appointment is created and nothing is sent. To book the real session, use the chat widget on this page.<br><br>He educates, you decide. You file your own claim. No win, no fee.';
     document.getElementById('mailAj').innerHTML =
       '<b>New booking:</b> ' + esc(state.name) + '<br>When: ' + esc(when) + '<br>Email: ' + esc(state.email) +
       '<br>Phone: ' + esc(state.phone) + '<br><br>Source: DJ Skyler landing page (demo)';
