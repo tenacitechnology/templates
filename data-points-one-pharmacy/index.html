@@ -267,7 +267,9 @@
     .bleed-card { grid-template-columns: 1fr; }
     .ramp { overflow-y: auto; }
     .territory { width: auto; left: 10px; right: 10px; top: auto; bottom: 0; height: 56%; border-radius: 18px 18px 0 0; overflow-y: auto; transition: height 0.25s ease; }
-    .terr-handle { display: block; width: 44px; height: 5px; flex: none; border-radius: 3px; background: var(--ink); opacity: 0.25; margin: 0 auto 8px; cursor: grab; touch-action: none; }
+    .terr-handle { display: flex; align-items: center; justify-content: center; gap: 8px; width: auto; margin: -8px -8px 6px; height: 44px; flex: none; cursor: grab; touch-action: none; border-radius: 12px; }
+    .terr-handle::before { content: ""; width: 48px; height: 5px; flex: none; border-radius: 3px; background: var(--ink); opacity: 0.25; }
+    .terr-handle::after { content: "DRAG UP TO VIEW ALL · DRAG DOWN TO HIDE"; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-soft); opacity: 0.65; white-space: nowrap; }
     #b2bmap .leaflet-bottom.leaflet-right { bottom: auto; top: 44px; }
   }
   @media (max-width: 520px) {
