@@ -236,6 +236,7 @@
   .tt-val { font-size: clamp(20px, 2vw, 28px); font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .tt-note { font-size: 11px; color: var(--ink-soft); }
   .terr-foot { font-size: 10px; line-height: 1.45; color: var(--ink-soft); opacity: 0.75; border-top: 1px solid var(--line); padding-top: 8px; }
+  .terr-handle { display: none; }
   #b2bmap .leaflet-bottom.leaflet-right { bottom: 92px; right: clamp(12px, 2vw, 28px); }
   #b2bmap .leaflet-control-zoom { border: none !important; box-shadow: 0 6px 20px rgba(19,21,25,0.25) !important; border-radius: 10px !important; overflow: hidden; }
   #b2bmap .leaflet-control-zoom a { width: 32px !important; height: 32px !important; line-height: 32px !important; color: var(--ink) !important; border-bottom: 1px solid var(--line) !important; font-weight: 700; }
@@ -265,7 +266,8 @@
     .proj { padding-right: 0; }
     .bleed-card { grid-template-columns: 1fr; }
     .ramp { overflow-y: auto; }
-    .territory { width: auto; left: 10px; right: 10px; top: auto; bottom: 0; height: 56%; border-radius: 18px 18px 0 0; overflow-y: auto; }
+    .territory { width: auto; left: 10px; right: 10px; top: auto; bottom: 0; height: 56%; border-radius: 18px 18px 0 0; overflow-y: auto; transition: height 0.25s ease; }
+    .terr-handle { display: block; width: 44px; height: 5px; flex: none; border-radius: 3px; background: var(--ink); opacity: 0.25; margin: 0 auto 8px; cursor: grab; touch-action: none; }
     #b2bmap .leaflet-bottom.leaflet-right { bottom: auto; top: 44px; }
   }
   @media (max-width: 520px) {
@@ -838,6 +840,56 @@
     initMap();
   }
   refresh();
+})();
+</script>
+
+<script>
+// Mobile bottom-sheet drag: down collapses to a peek, up expands to full view. Narrow screens only.
+(function () {
+  var t = document.querySelector('.territory');
+  if (!t) return;
+  var handle = document.createElement('div');
+  handle.className = 'terr-handle';
+  handle.setAttribute('aria-label', 'Drag to expand or collapse panel');
+  t.insertBefore(handle, t.firstChild);
+
+  var MINI = 120, FULLRATIO = 0.92;
+  var drag = null;
+
+  function narrow() { return window.innerWidth <= 880; }
+  function fullH() { return Math.round(window.innerHeight * FULLRATIO); }
+
+  handle.addEventListener('pointerdown', function (e) {
+    if (!narrow()) return;
+    drag = { y: e.clientY, h: t.getBoundingClientRect().height, moved: false };
+    t.style.transition = 'none';
+    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+  handle.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dy = drag.y - e.clientY; // up = positive
+    if (Math.abs(dy) > 4) drag.moved = true;
+    var nh = Math.max(MINI, Math.min(fullH(), drag.h + dy));
+    t.style.height = nh + 'px';
+  });
+  function endDrag(e) {
+    if (!drag) return;
+    var d = drag; drag = null;
+    t.style.transition = '';
+    if (!d.moved) { // tap toggles
+      t.style.height = (t.getBoundingClientRect().height < (MINI + fullH()) / 2) ? fullH() + 'px' : MINI + 'px';
+      return;
+    }
+    var nh = t.getBoundingClientRect().height;
+    t.style.height = (nh > (MINI + fullH()) / 2) ? fullH() + 'px' : MINI + 'px';
+  }
+  handle.addEventListener('pointerup', endDrag);
+  handle.addEventListener('pointercancel', function () { if (drag) { drag = null; t.style.transition = ''; } });
+
+  window.addEventListener('resize', function () {
+    if (!narrow()) { t.style.height = ''; } // leave inline height behind on desktop
+  });
 })();
 </script>
 
