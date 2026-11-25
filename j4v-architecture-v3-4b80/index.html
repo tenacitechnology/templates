@@ -478,10 +478,18 @@
   /* ── Coach channel ── */
   .channel-card { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
   .card-stack { display: flex; gap: 0.4rem; flex-shrink: 0; }
-  .mini-card { width: 3.4rem; height: 2.15rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); }
+  .mini-card { width: 3.4rem; height: 2.15rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+  .mini-card:hover, .mini-card:focus-visible { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(28,36,32,0.22); outline: none; }
   .mini-card.k-black { background: linear-gradient(150deg, #2b3134, #121618); }
   .mini-card.k-silver { background: linear-gradient(150deg, #f7f8f8, #c9ccd0); }
   .mini-card.k-gold { background: linear-gradient(150deg, #f7e6b4, #cfa14f); }
+  /* Handshake demo overlay (iframe of j4v-handshake-card.html) */
+  .hs-panel {
+    background: var(--paper); border-radius: 14px; max-width: 470px; width: 100%;
+    box-shadow: 0 24px 64px rgba(28,36,32,0.3); overflow: hidden;
+    animation: modalIn 0.3s var(--ease);
+  }
+  .hs-panel iframe { border: none; width: 100%; height: min(72vh, 620px); display: block; background: var(--paper); }
   .channel-body h3 { font-size: 1rem; font-weight: 800; }
   .channel-body p { font-size: 0.8rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.3rem; line-height: 1.5; }
   .channel-url { font-size: 0.75rem; color: var(--blue); font-weight: 700; margin-top: 0.3rem; word-break: break-all; }
@@ -956,9 +964,9 @@
   <div class="sub-label"><span class="tick"></span><h3>Each coach gets a channel</h3></div>
   <div class="card channel-card">
     <div class="card-stack">
-      <div class="mini-card k-black"></div>
-      <div class="mini-card k-silver"></div>
-      <div class="mini-card k-gold"></div>
+      <div class="mini-card k-black" data-hstier="black" role="button" tabindex="0" aria-label="Play Black card handshake demo"></div>
+      <div class="mini-card k-silver" data-hstier="silver" role="button" tabindex="0" aria-label="Play Silver card handshake demo"></div>
+      <div class="mini-card k-gold" data-hstier="gold" role="button" tabindex="0" aria-label="Play Gold card handshake demo"></div>
     </div>
     <div class="channel-body">
       <h3>The Handshake Card</h3>
@@ -1029,6 +1037,20 @@
     </div>
     <div class="demo-stage" id="demo-stage"></div>
     <div class="modal-desc" id="modal-desc"></div>
+  </div>
+</div>
+
+<!-- HANDSHAKE DEMO MODAL -->
+<div class="modal-overlay" id="hs-modal">
+  <div class="hs-panel">
+    <div class="modal-head">
+      <div>
+        <h3>The Handshake Card</h3>
+        <div class="modal-tier" id="hs-tier-label"></div>
+      </div>
+      <button class="modal-close" id="hs-close" aria-label="Close">&#10005;</button>
+    </div>
+    <iframe id="hs-frame" title="Handshake card animation demo"></iframe>
   </div>
 </div>
 
@@ -1266,7 +1288,26 @@
   });
   $("modal-close").addEventListener("click", closeModal);
   $("modal").addEventListener("click", function (e) { if (e.target.id === "modal") closeModal(); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+  // ── Handshake card demo modal (iframe; src set on open so the video loads lazily) ──
+  var HS_TIERS = { black: "Black · Deploy", silver: "Silver · Engage", gold: "Gold · Overwatch" };
+  function openHandshake(tier) {
+    if (!HS_TIERS[tier]) return;
+    $("hs-tier-label").textContent = HS_TIERS[tier];
+    $("hs-frame").src = "j4v-handshake-card.html?tier=" + tier;
+    $("hs-modal").classList.add("open");
+  }
+  function closeHandshake() {
+    $("hs-modal").classList.remove("open");
+    $("hs-frame").src = "about:blank"; // stop the demo video
+  }
+  document.querySelectorAll(".mini-card[data-hstier]").forEach(function (el) {
+    el.addEventListener("click", function () { openHandshake(el.getAttribute("data-hstier")); });
+    el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openHandshake(el.getAttribute("data-hstier")); } });
+  });
+  $("hs-close").addEventListener("click", closeHandshake);
+  $("hs-modal").addEventListener("click", function (e) { if (e.target.id === "hs-modal") closeHandshake(); });
+
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeModal(); closeHandshake(); } });
 
   // ── Competitor landscape pie (relative scale proxies from the competitor analysis session) ──
   // J4V's slice is sized to equal the served % from the gap control; competitors stay fixed.
