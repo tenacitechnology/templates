@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Dashboard, Just 4 Veterans</title>
+<style>
+  /* ── Tokens ─────────────────────────────────────────────
+     Palette lock: sage paper + bone surfaces + ink, olive accent.
+     Semantic stage hues only, all desaturated.
+     Radius rule: pills 999 · cards 10 · buttons 8 · panel 14 */
+  :root {
+    --paper: #eceee7;
+    --surface: #fbfbf7;
+    --ink: #1c2420;
+    --ink-soft: #5f6a60;
+    --line: #dcdfd3;
+    --olive: #4c5c3c;
+    --navy: #1e2a33;
+    --gold: #a97c2f;
+    --green: #3e7a55;
+    --blue: #3d6486;
+    --brick: #a4443c;
+    --gray: #8a938b;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: 18px; }
+  body {
+    font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+  .num, .card-time, .count { font-variant-numeric: tabular-nums; }
+
+  /* ── Floating header ──────────────────────────────────── */
+  header {
+    position: sticky; top: 1rem; z-index: 40;
+    max-width: 1440px; margin: 1rem auto 0; padding: 0 1.5rem;
+  }
+  .header-pill {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.65rem 1.4rem 0.65rem 1.1rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    box-shadow: 0 10px 30px rgba(30,42,51,0.25);
+  }
+  .brand { display: flex; align-items: center; gap: 0.75rem; }
+  .star {
+    width: 2rem; height: 2rem; flex-shrink: 0;
+    background: var(--gold);
+    clip-path: polygon(50% 0%, 63% 35%, 98% 35%, 70% 57%, 81% 91%, 50% 70%, 19% 91%, 30% 57%, 2% 35%, 37% 35%);
+  }
+  .brand h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.01em; }
+  .brand p { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #9fb0bd; }
+  .header-right { display: flex; align-items: center; gap: 0.8rem; }
+  .demo-badge {
+    font-size: 0.64rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.28); color: #d9c896;
+    padding: 0.28rem 0.65rem; border-radius: 999px;
+  }
+  .coach-id { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 600; color: #cdd7de; }
+  .avatar {
+    width: 2rem; height: 2rem; border-radius: 50%;
+    background: var(--olive); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.78rem;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  /* ── Stats: double-bezel cards ────────────────────────── */
+  .stats {
+    max-width: 1440px; margin: 1.4rem auto 0; padding: 0 1.5rem;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.9rem;
+  }
+  .bezel {
+    background: rgba(28,36,32,0.05);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 3px;
+  }
+  .stat {
+    background: var(--surface);
+    border-radius: 11px;
+    padding: 0.95rem 1.15rem 0.9rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .stat .num { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+  .stat .lbl { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-top: 0.15rem; }
+  .stat .sub { font-size: 0.76rem; font-weight: 600; margin-top: 0.3rem; }
+  .n-navy { color: var(--navy); } .n-blue { color: var(--blue); }
+  .n-green { color: var(--green); } .n-gold { color: var(--gold); }
+  .up { color: var(--green); }
+
+  /* ── Board ────────────────────────────────────────────── */
+  .board-wrap { max-width: 1440px; margin: 1.5rem auto 0; padding: 0 1.5rem 2.2rem; }
+  .board-title { margin-bottom: 0.85rem; }
+  .board-title h2 { font-size: 1rem; font-weight: 800; }
+  .board-title span { font-size: 0.8rem; color: var(--ink-soft); font-weight: 500; }
+  .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.85rem; align-items: start; }
+  @media (max-width: 1200px) { .board { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 760px)  { .board { grid-template-columns: 1fr; } html { font-size: 17px; } }
+
+  .col { background: rgba(28,36,32,0.04); border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem; }
+  .col-head { display: flex; align-items: center; justify-content: space-between; padding: 0.15rem 0.3rem 0.6rem; }
+  .col-head h3 { font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.45rem; }
+  .swatch { width: 0.55rem; height: 0.55rem; border-radius: 3px; flex-shrink: 0; }
+  .count {
+    font-size: 0.74rem; font-weight: 800; color: var(--ink-soft);
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.08rem 0.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.8rem 0.9rem;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(28,36,32,0.05);
+    transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), transform 0.15s var(--ease);
+  }
+  .card:hover { border-color: #b9bfb0; box-shadow: 0 5px 16px rgba(28,36,32,0.09); transform: translateY(-1px); }
+  .card:active { transform: translateY(0) scale(0.99); }
+  .card.hot { border-left: 3px solid var(--gold); }
+  .card-name { font-size: 0.95rem; font-weight: 800; }
+  .card-meta { font-size: 0.72rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.15rem; line-height: 1.4; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.6rem; }
+  .tag {
+    font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 0.16rem 0.45rem; border-radius: 999px; white-space: nowrap;
+  }
+  .t-email { background: #e3eaf1; color: var(--blue); }
+  .t-page  { background: #e6ebdd; color: var(--olive); }
+  .t-ref   { background: #f0e8d8; color: #8a6114; }
+  .card-note { font-size: 0.8rem; margin-top: 0.45rem; line-height: 1.35; color: var(--ink); }
+  .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
+  .card-time { font-size: 0.68rem; color: var(--ink-soft); font-weight: 600; }
+  .pill { font-size: 0.64rem; font-weight: 800; padding: 0.14rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .p-hot  { background: #f0e4c8; color: #8a6114; }
+  .p-new  { background: #e6e8e2; color: var(--ink-soft); }
+  .p-book { background: #ddebde; color: var(--green); }
+
+  /* ── Detail panel ─────────────────────────────────────── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(28,36,32,0.45);
+    display: none; align-items: center; justify-content: center; padding: 1.25rem; z-index: 60;
+  }
+  .overlay.open { display: flex; }
+  .panel {
+    background: var(--surface); border-radius: 14px; max-width: 560px; width: 100%;
+    max-height: 88dvh; overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(28,36,32,0.3);
+  }
+  .panel-head { padding: 1.35rem 1.45rem 1rem; border-bottom: 1px solid var(--line); }
+  .ph-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .panel-head h3 { font-size: 1.25rem; font-weight: 800; }
+  .ph-meta { font-size: 0.8rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.25rem; line-height: 1.45; }
+  .close {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    width: 2rem; height: 2rem; font-size: 0.9rem; cursor: pointer; color: var(--ink-soft);
+    transition: background 0.2s var(--ease);
+  }
+  .close:hover { background: #eef0e9; }
+  .stage-chip {
+    display: inline-block; margin-top: 0.75rem;
+    font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 0.28rem 0.65rem; border-radius: 999px;
+  }
+  .sc-new     { background: #e6e8e2; color: var(--ink-soft); }
+  .sc-engaged { background: #e3eaf1; color: var(--blue); }
+  .sc-booked  { background: #ddebde; color: var(--green); }
+  .sc-client  { background: #f0e4c8; color: #8a6114; }
+  .sc-dead    { background: #f2e0de; color: var(--brick); }
+
+  .timeline { padding: 1.15rem 1.45rem 0.4rem; }
+  .timeline h4 { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-bottom: 0.85rem; }
+  .t-item { display: flex; gap: 0.8rem; padding-bottom: 0.95rem; position: relative; }
+  .t-item:not(:last-child)::before {
+    content: ""; position: absolute; left: 0.5rem; top: 1.25rem; bottom: 0;
+    width: 2px; background: var(--line);
+  }
+  .t-dot {
+    width: 1.05rem; height: 1.05rem; border-radius: 50%; flex-shrink: 0; margin-top: 0.1rem;
+    border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--line);
+  }
+  .t-item.done .t-dot { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+  .t-item.now  .t-dot { background: var(--gold);  box-shadow: 0 0 0 2px var(--gold); }
+  .t-when { font-size: 0.66rem; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+  .t-what { font-size: 0.88rem; font-weight: 700; margin-top: 0.1rem; }
+  .t-detail { font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.15rem; line-height: 1.4; }
+
+  .panel-actions { padding: 0.6rem 1.45rem 1.4rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .btn {
+    font-size: 0.8rem; font-weight: 800; padding: 0.6rem 1.1rem; border-radius: 8px;
+    border: none; cursor: pointer;
+    transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { box-shadow: 0 4px 14px rgba(30,42,51,0.3); }
+  .btn-ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: #eef0e9; }
+
+  footer {
+    max-width: 1440px; margin: 0 auto; padding: 0 1.5rem 2rem;
+    font-size: 0.72rem; color: var(--ink-soft); font-weight: 500;
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-pill">
+    <div class="brand">
+      <div class="star"></div>
+      <div>
+        <h1>Coach Dashboard</h1>
+        <p>Just 4 Veterans</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="demo-badge">Demo data</span>
+      <div class="coach-id">
+        <div class="avatar">RD</div>
+        <span>Coach Ray Daniels</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="stats">
+  <div class="bezel"><div class="stat">
+    <div class="num n-navy" id="stat-imported">0</div>
+    <div class="lbl">Leads imported</div>
+    <div class="sub up">5,000 loaded. 2,940 valid emails.</div>
+  </div></div>
+  <div class="bezel"><div class="stat">
+    <div class="num n-blue" id="stat-engaged">0</div>
+    <div class="lbl">Engaged</div>
+    <div class="sub up">Up 38 this week</div>
+  </div></div>
+  <div class="bezel"><div class="stat">
+    <div class="num n-green" id="stat-booked">0</div>
+    <div class="lbl">Calls booked</div>
+    <div class="sub up">Up 9 this week</div>
+  </div></div>
+  <div class="bezel"><div class="stat">
+    <div class="num n-gold" id="stat-clients">0</div>
+    <div class="lbl">New clients</div>
+    <div class="sub up">Up 2 this week</div>
+  </div></div>
+</section>
+
+<div class="board-wrap">
+  <div class="board-title">
+    <h2>Pipeline</h2>
+    <span>Leads move here automatically. Nothing for you to update.</span>
+  </div>
+  <div class="board" id="board"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="ph-top">
+        <div>
+          <h3 id="p-name"></h3>
+          <div class="ph-meta" id="p-meta"></div>
+        </div>
+        <button class="close" onclick="closePanel()" aria-label="Close">&#10005;</button>
+      </div>
+      <span class="stage-chip" id="p-stage"></span>
+    </div>
+    <div class="timeline">
+      <h4>Journey</h4>
+      <div id="p-timeline"></div>
+    </div>
+    <div class="panel-actions">
+      <button class="btn btn-primary">Call now</button>
+      <button class="btn btn-ghost">Send SMS</button>
+      <button class="btn btn-ghost">Add note</button>
+    </div>
+  </div>
+</div>
+
+<footer>Sample data for demonstration. The production version reads live from GoHighLevel.</footer>
+
+<script>
+const LEADS = [
+  { name:"Marcus Reed", meta1:"USMC, Ret. Gunnery Sgt", meta2:"San Diego, CA", stage:"booked", source:"Email #2", tag:"t-email", note:"Replied YES to SMS. Booked Thursday 10am.", time:"Today 8:42 AM", pill:"p-book", pillText:"Thu 10:00 AM", hot:true,
+    journey:[
+      {when:"Mon 9:04 AM", what:"Imported from list", detail:"5,000 lead spreadsheet, batch 4 of 10"},
+      {when:"Mon 6:15 PM", what:"Opened email 1, Your next mission", detail:"Opened 3 times"},
+      {when:"Tue 11:30 AM", what:"Clicked booking link", detail:"Spent 4 min on the calling card page"},
+      {when:"Tue 11:47 AM", what:"Replied YES, send me the info", detail:"Marked Engaged automatically"},
+      {when:"Tue 11:52 AM", what:"SMS opt-in confirmed", detail:"AI answered his pricing question"},
+      {when:"Today 8:42 AM", what:"Booked a call for Thursday 10:00 AM", detail:"Added to your calendar"}
+    ]},
+  { name:"Tanya Whitfield", meta1:"Army, Ret. SFC", meta2:"Austin, TX", stage:"engaged", source:"Email #3", tag:"t-email", note:"Asked about program cost by reply.", time:"Today 7:15 AM",
+    journey:[
+      {when:"Tue 9:00 AM", what:"Imported from list", detail:"Batch 4 of 10"},
+      {when:"Wed 7:40 PM", what:"Opened email 2", detail:""},
+      {when:"Today 7:15 AM", what:"Replied asking what the program costs", detail:"AI drafted a reply, waiting on you"}
+    ]},
+  { name:"James Okafor", meta1:"Navy, Ret. Chief", meta2:"Jacksonville, FL", stage:"engaged", source:"Landing page", tag:"t-page", note:"Arrived from the calling card link.", time:"Yesterday 9:03 PM",
+    journey:[
+      {when:"Yesterday 8:12 PM", what:"Visited the calling card page", detail:"Came from a LinkedIn post"},
+      {when:"Yesterday 9:03 PM", what:"Downloaded the program one-pager", detail:"Marked Engaged automatically"}
+    ]},
+  { name:"Robert Vasquez", meta1:"Army, Ret. CPT", meta2:"Phoenix, AZ", stage:"new", source:"Email #1", tag:"t-email", note:"Delivered, not opened yet.", time:"Today 6:00 AM", pill:"p-new", pillText:"Day 3",
+    journey:[
+      {when:"Mon 9:04 AM", what:"Imported from list", detail:"Batch 4 of 10"},
+      {when:"Mon 9:05 AM", what:"Email 1 delivered", detail:"Awaiting open"}
+    ]},
+  { name:"Denise Carter", meta1:"Air Force, Ret. MSgt", meta2:"Tampa, FL", stage:"new", source:"Email #1", tag:"t-email", note:"Delivered, not opened yet.", time:"Today 6:00 AM", pill:"p-new", pillText:"Day 3",
+    journey:[
+      {when:"Mon 9:04 AM", what:"Imported from list", detail:"Batch 4 of 10"},
+      {when:"Mon 9:05 AM", what:"Email 1 delivered", detail:"Awaiting open"}
+    ]},
+  { name:"Frank Delgado", meta1:"USMC, Ret. SSgt", meta2:"El Paso, TX", stage:"new", source:"Referral", tag:"t-ref", note:"Referred by Marcus Reed.", time:"Yesterday 4:20 PM", pill:"p-hot", pillText:"Warm intro",
+    journey:[
+      {when:"Yesterday 4:20 PM", what:"Added via referral form", detail:"Referred by Marcus Reed, now in the Call Booked column"},
+      {when:"Yesterday 4:21 PM", what:"Welcome email sent", detail:""}
+    ]},
+  { name:"Harold Jenkins", meta1:"Army, Vietnam era", meta2:"Columbus, OH", stage:"new", source:"Email #1", tag:"t-email", note:"Delivered, not opened yet.", time:"Today 6:00 AM", pill:"p-new", pillText:"Day 3",
+    journey:[
+      {when:"Mon 9:04 AM", what:"Imported from list", detail:"Batch 5 of 10"},
+      {when:"Mon 9:05 AM", what:"Email 1 delivered", detail:"Awaiting open"}
+    ]},
+  { name:"Sandra Mills", meta1:"Navy, Ret. LCDR", meta2:"Virginia Beach, VA", stage:"engaged", source:"Email #2", tag:"t-email", note:"Opened every email. Ready for a nudge.", time:"Today 6:58 AM",
+    journey:[
+      {when:"Tue 9:00 AM", what:"Imported from list", detail:"Batch 5 of 10"},
+      {when:"Wed 6:12 AM", what:"Opened email 1", detail:""},
+      {when:"Thu 8:44 PM", what:"Opened email 2 twice", detail:"High interest signal"}
+    ]},
+  { name:"Andre Boateng", meta1:"Army, Ret. SGT", meta2:"Atlanta, GA", stage:"booked", source:"Email #3", tag:"t-email", note:"Booked straight from the email, no hand holding.", time:"Yesterday 2:31 PM", pill:"p-book", pillText:"Fri 1:00 PM",
+    journey:[
+      {when:"Tue 9:00 AM", what:"Imported from list", detail:"Batch 5 of 10"},
+      {when:"Thu 9:15 AM", what:"Opened email 3, the case study", detail:""},
+      {when:"Yesterday 2:31 PM", what:"Booked a call for Friday 1:00 PM", detail:"Added to your calendar"}
+    ]},
+  { name:"Patricia Nguyen", meta1:"Air Force, Ret. TSgt", meta2:"Denver, CO", stage:"engaged", source:"Email #2", tag:"t-email", note:"Clicked the calendar link twice.", time:"Yesterday 8:02 PM",
+    journey:[
+      {when:"Tue 9:00 AM", what:"Imported from list", detail:"Batch 5 of 10"},
+      {when:"Yesterday 8:01 PM", what:"Opened email 2", detail:""},
+      {when:"Yesterday 8:02 PM", what:"Clicked booking link twice", detail:"Did not finish booking, nudge scheduled"}
+    ]},
+  { name:"Walter Simmons", meta1:"USMC, Ret. Col", meta2:"Dallas, TX", stage:"booked", source:"Landing page", tag:"t-page", note:"Scanned the QR code on your business card.", time:"Mon 11:12 AM", pill:"p-book", pillText:"Wed 11:00 AM",
+    journey:[
+      {when:"Mon 10:58 AM", what:"Scanned card QR code to the calling card page", detail:"Met at the VFW event Saturday"},
+      {when:"Mon 11:12 AM", what:"Booked a call for Wednesday 11:00 AM", detail:"Added to your calendar"}
+    ]},
+  { name:"Grace Osei", meta1:"Army, Ret. MAJ", meta2:"Charlotte, NC", stage:"client", source:"Email #2", tag:"t-email", note:"Signed Tuesday. Onboarding sent.", time:"Tue 5:45 PM",
+    journey:[
+      {when:"Mon 9:04 AM", what:"Imported from list", detail:"Batch 3 of 10"},
+      {when:"Tue 10:20 AM", what:"Replied this is what I need", detail:""},
+      {when:"Tue 2:00 PM", what:"Discovery call, 45 min", detail:"Went great"},
+      {when:"Tue 5:45 PM", what:"Signed and paid", detail:"Client onboarding sequence started"}
+    ]},
+  { name:"Eddie Morales", meta1:"Navy Seabee, Ret.", meta2:"San Antonio, TX", stage:"client", source:"Referral", tag:"t-ref", note:"Signed last week.", time:"Last week",
+    journey:[
+      {when:"2 weeks ago", what:"Referred by Walter Simmons", detail:""},
+      {when:"Last week", what:"Discovery call", detail:""},
+      {when:"Last week", what:"Signed and paid", detail:"Client onboarding sequence started"}
+    ]},
+  { name:"Kimberly Ross", meta1:"Army, Ret. SPC", meta2:"Nashville, TN", stage:"new", source:"Email #1", tag:"t-email", note:"Delivered, not opened yet.", time:"Today 6:00 AM", pill:"p-new", pillText:"Day 2",
+    journey:[
+      {when:"Tue 9:00 AM", what:"Imported from list", detail:"Batch 6 of 10"},
+      {when:"Tue 9:01 AM", what:"Email 1 delivered", detail:"Awaiting open"}
+    ]},
+  { name:"Doug Fletcher", meta1:"USMC, Ret. MSgt", meta2:"Las Vegas, NV", stage:"engaged", source:"Email #3", tag:"t-email", note:"Asked about evening call times.", time:"Yesterday 6:47 PM",
+    journey:[
+      {when:"Tue 9:00 AM", what:"Imported from list", detail:"Batch 6 of 10"},
+      {when:"Yesterday 6:45 PM", what:"Opened email 3", detail:""},
+      {when:"Yesterday 6:47 PM", what:"Replied asking about evening calls", detail:"AI drafted a reply"}
+    ]},
+  { name:"Lorraine Beck", meta1:"Coast Guard, Ret.", meta2:"Minneapolis, MN", stage:"dead", source:"Email #1", tag:"t-email", note:"Email bounced. Removed from sends.", time:"Mon 9:06 AM",
+    journey:[
+      {when:"Mon 9:04 AM", what:"Imported from list", detail:"Batch 6 of 10"},
+      {when:"Mon 9:06 AM", what:"Email bounced", detail:"Auto removed from the sequence to protect sender reputation"}
+    ]}
+];
+
+const STAGES = [
+  { id:"new",     label:"New",       color:"var(--gray)" },
+  { id:"engaged", label:"Engaged",   color:"var(--blue)" },
+  { id:"booked",  label:"Call Booked", color:"var(--green)" },
+  { id:"client",  label:"Client",    color:"var(--gold)" },
+  { id:"dead",    label:"Dead",      color:"var(--brick)" }
+];
+const STAGE_LABEL = Object.fromEntries(STAGES.map(s => [s.id, s.label]));
+const STAGE_CHIP = { new:"sc-new", engaged:"sc-engaged", booked:"sc-booked", client:"sc-client", dead:"sc-dead" };
+
+function renderBoard() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  STAGES.forEach(stage => {
+    const leads = LEADS.filter(l => l.stage === stage.id);
+    const col = document.createElement("div");
+    col.className = "col";
+    col.innerHTML =
+      '<div class="col-head"><h3><span class="swatch" style="background:' + stage.color + '"></span>' +
+      stage.label + '</h3><span class="count">' + leads.length + '</span></div>';
+    leads.forEach((lead, i) => {
+      const card = document.createElement("div");
+      card.className = "card" + (lead.hot ? " hot" : "");
+      card.style.animation = "fadeUp 0.5s " + (i * 0.05) + "s cubic-bezier(0.16,1,0.3,1) both";
+      card.innerHTML =
+        '<div class="card-top"><div>' +
+        '<div class="card-name">' + lead.name + '</div>' +
+        '<div class="card-meta">' + lead.meta1 + '<br>' + lead.meta2 + '</div></div>' +
+        '<span class="tag ' + lead.tag + '">' + lead.source + '</span></div>' +
+        '<div class="card-note">' + lead.note + '</div>' +
+        '<div class="card-foot"><span class="card-time">' + lead.time + '</span>' +
+        (lead.pill ? '<span class="pill ' + lead.pill + '">' + lead.pillText + '</span>' : '') + '</div>';
+      card.onclick = () => openPanel(lead);
+      col.appendChild(card);
+    });
+    board.appendChild(col);
+  });
+}
+
+function openPanel(lead) {
+  document.getElementById("p-name").textContent = lead.name;
+  document.getElementById("p-meta").innerHTML = lead.meta1 + "<br>" + lead.meta2;
+  const chip = document.getElementById("p-stage");
+  chip.textContent = STAGE_LABEL[lead.stage];
+  chip.className = "stage-chip " + STAGE_CHIP[lead.stage];
+  const tl = document.getElementById("p-timeline");
+  tl.innerHTML = "";
+  const settled = lead.stage === "new" || lead.stage === "dead";
+  lead.journey.forEach((step, i) => {
+    const isLast = i === lead.journey.length - 1;
+    const item = document.createElement("div");
+    item.className = "t-item " + (isLast && !settled ? "now" : "done");
+    item.innerHTML =
+      '<div class="t-dot"></div><div>' +
+      '<div class="t-when">' + step.when + '</div>' +
+      '<div class="t-what">' + step.what + '</div>' +
+      (step.detail ? '<div class="t-detail">' + step.detail + '</div>' : '') + '</div>';
+    tl.appendChild(item);
+  });
+  document.getElementById("overlay").classList.add("open");
+}
+
+function closePanel() { document.getElementById("overlay").classList.remove("open"); }
+document.getElementById("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closePanel(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+
+function animateNum(id, target, dur = 1200) {
+  const el = document.getElementById(id);
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+renderBoard();
+animateNum("stat-imported", 5000);
+animateNum("stat-engaged", 312);
+animateNum("stat-booked", 47);
+animateNum("stat-clients", 6);
+</script>
+</body>
+</html>

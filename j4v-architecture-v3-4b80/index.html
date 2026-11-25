@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J4V × TenaciTech — Scale Architecture</title>
+<style>
+  :root {
+    --paper: #eceee7;
+    --surface: #fbfbf7;
+    --ink: #1c2420;
+    --ink-soft: #5f6a60;
+    --line: #dcdfd3;
+    --olive: #4c5c3c;
+    --navy: #1e2a33;
+    --gold: #a97c2f;
+    --green: #3e7a55;
+    --blue: #3d6486;
+    --brick: #a4443c;
+    --gray: #8a938b;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* Presentation rhythm: sections pull into focus when scrolled near; tall sections scroll free between snaps */
+  html { scroll-snap-type: y proximity; scroll-padding-top: 4.5rem; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  .sec-label, .rev-strip { scroll-snap-align: start; }
+  body {
+    font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+  .slide { max-width: 1200px; margin: 0 auto; padding: 3.5rem 2.5rem 4.5rem; }
+
+  /* ── Header ── */
+  .kicker {
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--olive); margin-bottom: 0.6rem;
+  }
+  h1 { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+  h1 .accent { color: var(--olive); }
+  .sub { font-size: 0.95rem; color: var(--ink-soft); font-weight: 500; margin-top: 0.5rem; max-width: 46rem; line-height: 1.5; }
+
+  /* ── Section label ── */
+  .sec-label { display: flex; align-items: center; gap: 0.6rem; margin: 5rem 0 1.4rem; }
+  .sec-label .n {
+    width: 1.4rem; height: 1.4rem; border-radius: 50%; background: var(--navy); color: #fff;
+    font-size: 0.72rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  }
+  .sec-label h2 { font-size: 0.95rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; }
+  .sub-label { display:flex; align-items:center; gap:0.5rem; margin:2.8rem 0 1.1rem; }
+  .sub-label .tick { width:0.55rem; height:0.55rem; background:var(--olive); border-radius:2px; }
+  .sub-label h3 { font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1.6rem 1.8rem;
+  }
+  .bezel {
+    background: rgba(28,36,32,0.05); border: 1px solid var(--line);
+    border-radius: 14px; padding: 3px;
+  }
+  .bezel-inner {
+    background: var(--surface); border-radius: 11px; padding: 1.5rem 1.7rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7); height: 100%;
+  }
+
+  /* ── 1. The gap ── */
+  .gap-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 0.9rem; }
+  .gap-num { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+  .gap-lbl { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-top: 0.2rem; }
+  .gap-sub { font-size: 0.78rem; font-weight: 600; margin-top: 0.25rem; }
+  .bar-track {
+    height: 3.2rem; border-radius: 8px; overflow: hidden; display: flex;
+    background: var(--surface); border: 1px solid var(--line);
+  }
+  .bar-served {
+    background: var(--green); color: #fff; min-width: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 800; flex: 0 0 0.97%; position: relative;
+  }
+  .bar-served span { position: absolute; left: 0.6rem; color: #e6eae4; white-space: nowrap; font-size: 0.72rem; }
+  .bar-open {
+    background: var(--navy); color: #fff; flex: 1;
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 1rem;
+    font-size: 0.78rem; font-weight: 700;
+  }
+  .bar-caption { font-size: 0.75rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.5rem; }
+
+  /* ── Gap interactives: served % input + competitor pie ── */
+  .gap-flex { display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.25rem; }
+  .gap-input-row { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.7rem; }
+  .gap-input-row label { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); white-space: nowrap; }
+  .gap-input-row .calc-input { max-width: 110px; }
+  .pie-head { font-size: 0.85rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .pie-flex { display: flex; gap: 1rem; align-items: center; }
+  .pie-flex svg { width: 150px; height: 150px; flex-shrink: 0; }
+  .pie-legend { list-style: none; flex: 1; min-width: 0; }
+  .pie-legend li { display: flex; align-items: center; gap: 0.45rem; font-size: 0.7rem; font-weight: 700; padding: 0.16rem 0; }
+  .pie-legend .rk { width: 0.85rem; font-size: 0.62rem; font-weight: 800; color: var(--gray); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .pie-legend .dot { width: 0.55rem; height: 0.55rem; border-radius: 3px; flex-shrink: 0; }
+  .pie-legend .pv { margin-left: auto; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ── Output tiles ── */
+  .math-op { text-align: center; }
+  .math-val { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; }
+  .math-lbl { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-top: 0.2rem; }
+  .math-note { font-size: 0.76rem; font-weight: 600; color: var(--ink-soft); margin-top: 0.3rem; line-height: 1.4; }
+
+  /* ── Number ticker (odometer roll for calculator outputs) ── */
+  .tk { display: inline-block; white-space: nowrap; }
+  .tk-char { display: inline-block; height: 1em; line-height: 1em; overflow: hidden; vertical-align: bottom; }
+  .tk-char.tk-static { overflow: visible; }
+  .tk-strip { display: flex; flex-direction: column; will-change: transform; transition-property: transform; transition-timing-function: var(--ease); }
+  .tk-strip > span { display: block; height: 1em; line-height: 1em; text-align: center; }
+
+  /* ── Calculator ── */
+  .calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; align-items: stretch; }
+  .calc-field { display: flex; flex-direction: column; justify-content: flex-end; }
+  .calc-field label { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); display: block; margin-bottom: 0.35rem; }
+  .calc-input {
+    width: 100%; font: inherit; font-size: 1rem; font-weight: 800;
+    padding: 0.45rem 0.7rem; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--paper); color: var(--navy);
+  }
+  .calc-input:focus { outline: 2px solid var(--olive); outline-offset: 1px; }
+  .chip-row { display: flex; align-items: center; gap: 0.55rem; margin: 1rem 0 0.2rem; flex-wrap: wrap; }
+  .chip-row .chip-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); }
+  .chip {
+    font: inherit; font-size: 0.78rem; font-weight: 800; padding: 0.4rem 1rem;
+    border-radius: 999px; border: 1px solid var(--line); background: var(--paper);
+    color: var(--ink); cursor: pointer; transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  }
+  .chip:hover { background: #e2e5d9; }
+  .chip:focus-visible, .engine-step:focus-visible, .tier-toggle:focus-visible, .modal-close:focus-visible {
+    outline: 2px solid var(--olive); outline-offset: 2px;
+  }
+  .chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .assump { font-size: 0.72rem; color: var(--ink-soft); font-weight: 600; line-height: 1.5; }
+  .calc-outs { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 1.25rem; margin-top: 1rem; }
+
+  /* ── Projection chart ── */
+  .chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin: 1.4rem 0 0.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+
+  .chart-head h3 { font-size: 0.95rem; font-weight: 800; }
+  .chart-badge { text-align: right; }
+  .chart-badge .v { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--green); font-variant-numeric: tabular-nums; }
+  .chart-wrap { position: relative; }
+  .chart-wrap svg { display: block; width: 100%; height: auto; }
+  .chart-line { fill: none; stroke: var(--green); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .chart-ref { stroke: var(--ink-soft); stroke-width: 1.2; stroke-dasharray: 5 4; }
+  .chart-grid-line { stroke: rgba(28,36,32,0.08); stroke-width: 1; }
+  .chart-axis-label { font-size: 9px; font-weight: 700; fill: var(--ink-soft); }
+  .chart-ref-label { font-size: 9px; font-weight: 800; fill: var(--ink-soft); }
+  .chart-cross-label { font-size: 9px; font-weight: 800; fill: var(--green); }
+  .chart-dot { fill: var(--green); }
+  .chart-ring { fill: none; stroke: var(--green); stroke-width: 2; opacity: 0.5; transform-origin: center; animation: chPulse 1.8s var(--ease) infinite; }
+  @keyframes chPulse { 0% { r: 5; opacity: 0.5; } 100% { r: 14; opacity: 0; } }
+
+  /* ── Hero: 50/50 banner + problem→solution story ── */
+  .hero {
+    min-height: 82svh; display: grid; grid-template-columns: 1fr 1fr;
+    gap: 3rem; align-items: center; padding-top: 2rem;
+    scroll-snap-align: start;
+  }
+  .hero h1 { font-size: clamp(2.3rem, 3.4vw, 3.1rem); }
+  .hero .sub { margin-top: 1rem; }
+  .hero-proof { display: flex; gap: 1.6rem; margin-top: 2.2rem; }
+  .hero-proof .hp .v { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .hero-proof .hp .l { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-top: 0.15rem; }
+  .story { display: flex; flex-direction: column; gap: 1rem; }
+  .story-row { animation: storyIn 0.6s var(--ease) both; }
+  @keyframes storyIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .story-row:nth-child(1) { animation-delay: 0.35s; }
+  .story-row:nth-child(2) { animation-delay: 1.0s; }
+  .story-row:nth-child(3) { animation-delay: 1.8s; }
+  .story-row:nth-child(4) { animation-delay: 2.6s; }
+  .story-ghost { display: flex; align-items: center; gap: 0.5rem; font-size: 0.76rem; font-weight: 600; color: var(--gray); }
+  .story-ghost i { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--brick); opacity: 0.55; font-style: normal; }
+  .story-meta { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); margin-bottom: 0.25rem; }
+  .story-meta--right { text-align: right; }
+  .story-booked { display: flex; align-items: center; gap: 0.7rem; }
+  .story-booked .demo-stamp-el { position: static; animation: demoStamp 0.5s var(--ease) 2.9s both; font-size: 0.8rem; padding: 0.28rem 0.7rem; }
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; min-height: 0; gap: 2rem; padding-top: 1.5rem; }
+  }
+
+  /* ── Tier metal cards ── */
+  .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; align-items: start; }
+  .tier-card { position: relative; border-radius: 16px; padding: 1.35rem 1.4rem 1.25rem; overflow: hidden; display: flex; flex-direction: column; }
+  .tier-card::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.14) 45%, transparent 60%);
+  }
+  .tier-black { background: linear-gradient(150deg, #2b3134 0%, #121618 55%, #1e2427 100%); color: #dfe4e2; border: 1px solid #3d4449; }
+  .tier-silver { background: linear-gradient(150deg, #f7f8f8 0%, #c9ccd0 55%, #e4e6e8 100%); color: #22282b; border: 1px solid #b4b8bd; }
+  .tier-gold { background: linear-gradient(150deg, #f7e6b4 0%, #cfa14f 55%, #ecd08a 100%); color: #3a2d0e; border: 1px solid #b08a3c; }
+  .tier-metal-tag { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.75; }
+  .tier-name { font-size: 1.45rem; font-weight: 800; letter-spacing: 0.04em; margin-top: 0.15rem; }
+  .tier-black .tier-name { text-shadow: 0 1px 0 rgba(255,255,255,0.12); }
+  .tier-gold .tier-name, .tier-silver .tier-name { text-shadow: 0 1px 0 rgba(255,255,255,0.4); }
+  .tier-tagline { font-size: 0.78rem; font-weight: 700; opacity: 0.85; margin-top: 0.15rem; }
+  .nfc-row { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.7rem; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+  .tier-feats { list-style: none; margin-top: 0.85rem; flex: 1; }
+  .tier-feats li { font-size: 0.78rem; font-weight: 600; line-height: 1.45; padding: 0.22rem 0 0.22rem 1.05rem; position: relative; }
+  .tier-feats li.tier-plus { font-weight: 800; }
+  .tier-ribbon {
+    position: absolute; top: 0.9rem; right: -2.1rem; transform: rotate(38deg);
+    background: var(--navy); color: #f0dfa8; font-size: 0.58rem; font-weight: 800;
+    letter-spacing: 0.12em; text-transform: uppercase; padding: 0.2rem 2.4rem;
+  }
+
+  /* ── Tier expandable: spring expand from summary bullet (Motion physics) ── */
+  .tier-card { cursor: pointer; transition: transform 0.25s var(--ease), box-shadow 0.3s var(--ease); }
+  .tier-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(28,36,32,0.14); }
+  .tier-card.open { box-shadow: 0 14px 36px rgba(28,36,32,0.16); }
+  .tier-more { height: 0; overflow: hidden; }
+  .tier-more .tier-feats { margin-top: 0; flex: none; }
+  .tier-feats li.ti { display: flex; align-items: flex-start; gap: 0.55rem; padding-left: 0; }
+  .tier-feats li.ti::before { display: none; }
+  .tic { width: 0.85rem; height: 0.85rem; flex-shrink: 0; margin-top: 0.14rem; opacity: 0.65; }
+  .tier-toggle {
+    font: inherit; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+    color: inherit; background: transparent; border: 1px solid currentColor; border-radius: 999px;
+    padding: 0.35rem 0.9rem; margin-top: 0.9rem; cursor: pointer; opacity: 0.75; align-self: flex-start;
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    transition: opacity 0.2s var(--ease);
+  }
+  .tier-toggle:hover { opacity: 1; }
+  .tier-toggle .plus { display: inline-block; font-size: 0.95rem; line-height: 1; font-weight: 800; transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .tier-card.open .tier-toggle .plus { transform: rotate(45deg); }
+
+  /* ── Problem section ── */
+  .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 1.25rem; margin-bottom: 0.9rem; }
+  .pain-card { border-left: 4px solid var(--brick); }
+  .pain-card h3 { font-size: 0.95rem; font-weight: 800; display: flex; align-items: center; gap: 0.45rem; }
+  .pain-card h3 .swatch { width: 0.55rem; height: 0.55rem; border-radius: 3px; background: var(--brick); }
+  .pain-card .big { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.02em; color: var(--brick); margin-top: 0.5rem; font-variant-numeric: tabular-nums; }
+  .pain-card p { font-size: 0.8rem; font-weight: 600; color: var(--ink-soft); margin-top: 0.4rem; line-height: 1.5; }
+  .pain-card .src { font-size: 0.66rem; font-weight: 600; color: var(--gray); margin-top: 0.45rem; }
+  .shift-strip {
+    background: var(--navy); color: #fff; border-radius: 12px; padding: 1.05rem 1.4rem;
+    font-size: 0.92rem; font-weight: 700; line-height: 1.55; margin-bottom: 0.9rem;
+  }
+  .shift-strip .gold { color: #f0dfa8; }
+  .after-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+  .after-card { border-left: 4px solid var(--green); }
+  .after-card h3 { font-size: 0.92rem; font-weight: 800; color: var(--green); display: flex; align-items: center; gap: 0.45rem; }
+  .after-card h3 .swatch { width: 0.55rem; height: 0.55rem; border-radius: 3px; background: var(--green); }
+  .after-card p { font-size: 0.8rem; font-weight: 600; color: var(--ink-soft); margin-top: 0.4rem; line-height: 1.5; }
+
+  /* ── Architecture flow ── */
+  .flow { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding-bottom: 0.3rem; }
+  .flow-node {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.2rem 1.1rem; min-width: 140px; flex: 1; position: relative;
+    transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .flow-node:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(28,36,32,0.1); }
+  .flow-node h3 { font-size: 0.8rem; font-weight: 800; display: flex; align-items: center; gap: 0.45rem; }
+  .flow-node p { font-size: 0.72rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.35rem; line-height: 1.4; }
+  .flow-dot { width: 0.55rem; height: 0.55rem; border-radius: 3px; flex-shrink: 0; }
+  .flow-arrow { display: flex; align-items: center; justify-content: center; color: var(--ink-soft); font-weight: 800; font-size: 1.1rem; padding: 0 0.25rem; flex-shrink: 0; }
+  .tag-pill {
+    display: inline-block; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.14rem 0.5rem; border-radius: 999px; margin-top: 0.45rem;
+  }
+  .engine-detail {
+    margin-top: 0.9rem; background: rgba(30,42,51,0.04); border: 1px solid var(--line);
+    border-radius: 12px; padding: 0.9rem 1.2rem;
+  }
+  .engine-detail h4 { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-bottom: 0.15rem; }
+  .engine-hint { font-size: 0.7rem; font-weight: 700; color: var(--blue); margin-bottom: 0.6rem; }
+  .engine-steps { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .engine-step {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+    font-size: 0.74rem; font-weight: 700; padding: 0.35rem 0.85rem;
+    cursor: pointer; transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  }
+  .engine-step:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(28,36,32,0.12); border-color: #b9bfb0; }
+  .engine-step.ai { background: #f0e4c8; border-color: #e0cfa0; color: #6b4e17; }
+  .engine-arrow { color: var(--ink-soft); font-weight: 800; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(28,36,32,0.5); z-index: 80;
+    display: none; align-items: center; justify-content: center; padding: 1.25rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-panel {
+    background: var(--surface); border-radius: 14px; max-width: 540px; width: 100%;
+    box-shadow: 0 24px 64px rgba(28,36,32,0.3); overflow: hidden;
+    animation: modalIn 0.3s var(--ease);
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.1rem 1.3rem 0.8rem; border-bottom: 1px solid var(--line); }
+  .modal-head h3 { font-size: 1.05rem; font-weight: 800; }
+  .modal-tier { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--olive); margin-top: 0.2rem; }
+  .modal-close {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    width: 2rem; height: 2rem; font-size: 0.9rem; cursor: pointer; color: var(--ink-soft);
+  }
+  .modal-close:hover { background: #eef0e9; }
+  .demo-stage {
+    height: 190px; margin: 1rem 1.3rem; border-radius: 12px; position: relative; overflow: hidden;
+    background: rgba(28,36,32,0.04); border: 1px solid var(--line);
+  }
+  .modal-desc { padding: 0 1.3rem 1.25rem; font-size: 0.82rem; font-weight: 600; color: var(--ink-soft); line-height: 1.55; }
+  .demo-el { position: absolute; opacity: 0; }
+  @keyframes demoLoop { 0% { opacity: 0; transform: translateY(8px); } 12% { opacity: 1; transform: none; } 78% { opacity: 1; } 92%, 100% { opacity: 0; } }
+  @keyframes demoPop { 0% { opacity: 0; transform: scale(0.7); } 12% { opacity: 1; transform: scale(1); } 78% { opacity: 1; transform: scale(1); } 92%, 100% { opacity: 0; transform: scale(0.85); } }
+  @keyframes demoBlink { 0%, 45% { opacity: 0.25; } 55%, 90% { opacity: 1; } 100% { opacity: 0.25; } }
+  @keyframes demoStamp { 0% { opacity: 0; transform: scale(2.2) rotate(-14deg); } 14% { opacity: 1; transform: scale(1) rotate(-8deg); } 80% { opacity: 1; } 94%, 100% { opacity: 0; } }
+  @keyframes demoTravel { 0% { left: 8%; opacity: 1; } 70% { left: 82%; opacity: 1; } 88%, 100% { left: 82%; opacity: 0; } }
+  .d-loop { animation: demoLoop 3.2s var(--ease) infinite; }
+  .d-loop.d2 { animation-delay: 0.35s; }
+  .d-loop.d3 { animation-delay: 0.7s; }
+  .d-loop.d4 { animation-delay: 1.05s; }
+  .d-pop { animation: demoPop 3.2s var(--ease) infinite; }
+  .d-pop.d2 { animation-delay: 0.4s; }
+  .d-pop.d3 { animation-delay: 0.8s; }
+  .d-blink { animation: demoBlink 1.1s ease-in-out infinite; }
+  .d-stamp { animation: demoStamp 3.2s var(--ease) infinite; }
+  .d-travel { animation: demoTravel 1.6s linear infinite; }
+  .demo-chip {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    font-size: 0.7rem; font-weight: 700; padding: 0.4rem 0.65rem; color: var(--ink);
+    box-shadow: 0 2px 6px rgba(28,36,32,0.08); white-space: nowrap;
+  }
+  .demo-bubble {
+    background: var(--navy); color: #fff; font-size: 0.72rem; font-weight: 600;
+    padding: 0.45rem 0.7rem; border-radius: 10px; border-bottom-right-radius: 3px; max-width: 75%;
+  }
+  .demo-bubble-in {
+    background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+    font-size: 0.72rem; font-weight: 600; padding: 0.45rem 0.7rem; border-radius: 10px; border-bottom-left-radius: 3px;
+  }
+  .demo-stamp-el {
+    border: 3px solid var(--green); color: var(--green); font-size: 0.95rem; font-weight: 800;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 0.35rem 0.9rem; border-radius: 8px;
+  }
+  .demo-slot { width: 3rem; text-align: center; font-size: 0.7rem; font-weight: 700; padding: 0.35rem 0; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); }
+  .demo-slot.on { background: #ddebde; border-color: #bcd8be; color: var(--green); }
+  .demo-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--blue); }
+  .demo-path { position: absolute; left: 8%; right: 8%; top: 50%; height: 2px; background: var(--line); }
+
+  /* ── App peek ── */
+  .peek-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.25rem; margin-top: 0.9rem; }
+  .browser-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+  .bf-bar { display: flex; align-items: center; gap: 0.45rem; padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--line); background: rgba(28,36,32,0.03); }
+  .bf-dot { width: 0.62rem; height: 0.62rem; border-radius: 50%; flex-shrink: 0; }
+  .bf-url {
+    flex: 1; font-size: 0.72rem; font-weight: 700; color: var(--ink-soft);
+    background: var(--paper); border: 1px solid var(--line); border-radius: 999px;
+    padding: 0.22rem 0.8rem; margin-left: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .browser-frame iframe { border: none; width: 100%; height: 480px; display: block; background: var(--paper); }
+  .bento-col { display: flex; flex-direction: column; gap: 1.25rem; }
+  .bento-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.15rem; flex: 1; }
+  .bc-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .bc-dot { width: 0.55rem; height: 0.55rem; border-radius: 3px; }
+  .bc-pill { margin-left: auto; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; background: #f0e4c8; color: #8a6114; padding: 0.16rem 0.55rem; border-radius: 999px; }
+  .sms { display: flex; flex-direction: column; gap: 0.55rem; }
+  .sms-who { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); margin-bottom: 0.2rem; }
+  .bubble { font-size: 0.8rem; font-weight: 600; line-height: 1.4; padding: 0.5rem 0.75rem; border-radius: 12px; max-width: 92%; }
+  .bubble.in { background: rgba(28,36,32,0.06); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .bubble.out { background: var(--navy); color: #fff; border-bottom-right-radius: 4px; margin-left: auto; }
+  .sms-status { font-size: 0.7rem; font-weight: 700; color: var(--green); margin-top: 0.15rem; }
+  .slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; }
+  .slot-day { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--ink-soft); text-align: center; padding-bottom: 0.25rem; }
+  .slot { font-size: 0.7rem; font-weight: 700; text-align: center; padding: 0.3rem 0.1rem; border-radius: 6px; border: 1px solid var(--line); color: var(--ink-soft); background: var(--paper); }
+  .slot.booked { background: #ddebde; border-color: #bcd8be; color: var(--green); }
+  .slot.na { opacity: 0.35; }
+  .slot-note { font-size: 0.7rem; font-weight: 600; color: var(--ink-soft); margin-top: 0.7rem; line-height: 1.45; }
+
+  /* ── Use cases ── */
+  .use-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.25rem; }
+  .use-card h3 { font-size: 0.92rem; font-weight: 800; display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+  .use-card h3 .swatch { width: 0.55rem; height: 0.55rem; border-radius: 3px; flex-shrink: 0; }
+  .use-tier { font-size: 0.58rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.14rem 0.5rem; border-radius: 999px; background: #e6e8e2; color: var(--ink-soft); }
+  .use-tier.t-black { background: #23282b; color: #dfe4e2; }
+  .use-tier.t-silver { background: #c9ccd0; color: #22282b; }
+  .use-tier.t-gold { background: #e8c97e; color: #3a2d0e; }
+  .use-card p { font-size: 0.8rem; font-weight: 600; color: var(--ink-soft); margin-top: 0.45rem; line-height: 1.5; }
+
+  /* ── Coach channel ── */
+  .channel-card { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+  .card-stack { display: flex; gap: 0.4rem; flex-shrink: 0; }
+  .mini-card { width: 3.4rem; height: 2.15rem; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); }
+  .mini-card.k-black { background: linear-gradient(150deg, #2b3134, #121618); }
+  .mini-card.k-silver { background: linear-gradient(150deg, #f7f8f8, #c9ccd0); }
+  .mini-card.k-gold { background: linear-gradient(150deg, #f7e6b4, #cfa14f); }
+  .channel-body h3 { font-size: 1rem; font-weight: 800; }
+  .channel-body p { font-size: 0.8rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.3rem; line-height: 1.5; }
+  .channel-url { font-size: 0.75rem; color: var(--blue); font-weight: 700; margin-top: 0.3rem; word-break: break-all; }
+
+  /* ── Revenue strip ── */
+  .rev-strip {
+    margin-top: 2.4rem; background: var(--navy); border-radius: 14px; color: #fff;
+    padding: 1.4rem 1.7rem; display: flex; align-items: center; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+  }
+  .rev-strip h2 { font-size: 1.05rem; font-weight: 800; }
+  .rev-strip p { font-size: 0.8rem; color: #9fb0bd; font-weight: 600; margin-top: 0.25rem; line-height: 1.5; }
+  .rev-items { display: flex; gap: 1.8rem; flex-wrap: wrap; }
+  .rev-item .v { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+  .rev-item .l { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; color: #9fb0bd; margin-top: 0.15rem; }
+
+  /* ── Timeline rail nav (pen by Naila Ahmad, adapted to deck tokens) ── */
+  .tl-nav {
+    position: fixed; left: 26px; bottom: 26px; z-index: 70;
+    display: none; flex-direction: column;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (min-width: 1400px) { .tl-nav { display: flex; } }
+  .tl-nav::before { /* the spine */
+    content: ""; position: absolute; left: 3px; top: 0.6rem; bottom: 0.6rem;
+    width: 2px; background: var(--line); border-radius: 1px;
+  }
+  .tl-item {
+    position: relative; display: flex; align-items: baseline; gap: 0.6rem;
+    padding: 0.3rem 0 0.3rem 1rem;
+    text-decoration: none; color: var(--ink-soft);
+    transition: padding-left 0.25s var(--ease);
+  }
+  .tl-item::before { /* tick on the spine */
+    content: ""; position: absolute; left: 0; top: 0.78em;
+    width: 8px; height: 2px; background: var(--gray); border-radius: 1px;
+    transition: width 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.2s var(--ease);
+  }
+  .tl-item:hover { padding-left: 1.25rem; }
+  .tl-item:focus-visible { outline: 2px solid var(--olive); outline-offset: 2px; }
+  .tl-num { font-size: 0.72rem; font-weight: 800; color: var(--gray);
+    transition: font-size 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.2s var(--ease); }
+  .tl-label { display: grid; grid-template-columns: 0fr; opacity: 0;
+    transition: grid-template-columns 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s var(--ease); }
+  .tl-label > span { overflow: hidden; min-width: 0; white-space: nowrap;
+    font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+  .tl-item.on { color: var(--ink); padding-left: 1.35rem; }
+  .tl-item.on::before { width: 16px; background: var(--olive); }
+  .tl-item.on .tl-num { font-size: 1.05rem; color: var(--navy); }
+  .tl-item.on .tl-label { grid-template-columns: 1fr; opacity: 1; }
+
+  footer { max-width: 1200px; margin: 0 auto; padding: 0 2.5rem 3rem; font-size: 0.72rem; color: var(--ink-soft); font-weight: 500; }
+
+  @media (max-width: 900px) {
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); padding: 0.2rem 0; }
+    .peek-grid { grid-template-columns: 1fr; }
+    .gap-flex { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="tl-nav" aria-label="Sections">
+  <a class="tl-item on" href="#s-intro"><span class="tl-num">00</span><span class="tl-label"><span>Intro</span></span></a>
+  <a class="tl-item" href="#s-gap"><span class="tl-num">01</span><span class="tl-label"><span>The Gap</span></span></a>
+  <a class="tl-item" href="#s-problem"><span class="tl-num">02</span><span class="tl-label"><span>The Problem</span></span></a>
+  <a class="tl-item" href="#s-architecture"><span class="tl-num">03</span><span class="tl-label"><span>Architecture</span></span></a>
+  <a class="tl-item" href="#s-calculator"><span class="tl-num">04</span><span class="tl-label"><span>Calculator</span></span></a>
+  <a class="tl-item" href="#s-pricing"><span class="tl-num">05</span><span class="tl-label"><span>Pricing</span></span></a>
+  <a class="tl-item" href="#s-use-cases"><span class="tl-num">06</span><span class="tl-label"><span>Use Cases</span></span></a>
+  <a class="tl-item" href="#s-offer"><span class="tl-num">07</span><span class="tl-label"><span>The Offer</span></span></a>
+</nav>
+
+<main class="slide">
+
+  <header class="hero" id="s-intro">
+    <div class="hero-copy">
+      <div class="kicker">Just 4 Veterans × TenaciTech</div>
+      <h1>One engine. <span class="accent">138 coaches.</span> The other 99.03%.</h1>
+      <p class="sub">TenaciTech operates the sales engine behind every J4V coach — lead intake, alter-ego response, self-serve booking, and a clean coach portal — so coaches do one thing: take the call and close.</p>
+      <div class="hero-proof">
+        <div class="hp"><div class="v" style="color:var(--brick)">23%</div><div class="l">never answered</div></div>
+        <div class="hp"><div class="v" style="color:var(--green)">42s</div><div class="l">engine response</div></div>
+        <div class="hp"><div class="v" style="color:var(--navy)">0</div><div class="l">coach admin work</div></div>
+      </div>
+    </div>
+    <div class="bezel"><div class="bezel-inner">
+      <div class="story">
+        <div class="story-row">
+          <div class="story-meta">Veteran · 9:47 PM</div>
+          <div class="bubble in">Just got my denial letter. Is it even worth fighting?</div>
+        </div>
+        <div class="story-row story-ghost"><i></i>2 other coaches never replied</div>
+        <div class="story-row">
+          <div class="story-meta story-meta--right">Coach Ray — alter ego · answered in 42s</div>
+          <div class="bubble out">It is. No upfront cost — we only earn if your rating increases. Want a 15-min intro slot this week?</div>
+        </div>
+        <div class="story-row story-booked">
+          <span class="demo-chip">Tue 10:00 · Intro Call</span>
+          <span class="demo-stamp-el">Booked</span>
+        </div>
+      </div>
+    </div></div>
+  </header>
+
+  <!-- 1. THE GAP -->
+  <div class="sec-label" id="s-gap"><span class="n">1</span><h2>The gap we're closing</h2></div>
+  <div class="gap-stats">
+    <div class="bezel"><div class="bezel-inner">
+      <div class="gap-num num" style="color:var(--navy)">17,000,000</div>
+      <div class="gap-lbl">US veterans</div>
+      <div class="gap-sub" style="color:var(--ink-soft)">Total addressable market</div>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner">
+      <div class="gap-num num" style="color:var(--green)" id="g-served-num">165,000</div>
+      <div class="gap-lbl">Served by J4V today</div>
+      <div class="gap-sub" style="color:var(--green)" id="g-served-sub">0.97% of the market</div>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner">
+      <div class="gap-num num" style="color:var(--brick)" id="g-unserved-num">16,835,000</div>
+      <div class="gap-lbl">Unserved</div>
+      <div class="gap-sub" style="color:var(--brick)" id="g-unserved-sub">99.03% waiting</div>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner">
+      <div class="gap-num num" style="color:var(--olive)">138</div>
+      <div class="gap-lbl">Coaches ready</div>
+      <div class="gap-sub" style="color:var(--ink-soft)">Independent contractors, 1099</div>
+    </div></div>
+  </div>
+  <div class="gap-flex">
+    <div class="card" style="padding:1rem 1.2rem 1.1rem">
+      <div class="bar-track">
+        <div class="bar-served" id="gap-bar" style="flex:0 0 0.97%"><span id="gap-bar-label">Served · 165K (0.97%)</span></div>
+        <div class="bar-open" id="gap-open">Unserved · 16,835,000 veterans</div>
+      </div>
+      <div class="gap-input-row">
+        <label for="gap-pct">Served by J4V (%)</label>
+        <input id="gap-pct" class="calc-input" type="number" min="0.01" max="100" step="0.01" value="0.97">
+      </div>
+      <div class="bar-caption" id="gap-caption">≈ 10 per 1,000 veterans — the bottleneck isn't demand, it's the sales engine in front of each coach.</div>
+    </div>
+    <div class="card" style="padding:1rem 1.2rem 1.1rem">
+      <div class="pie-head">The competitive landscape</div>
+      <div class="pie-flex">
+        <svg id="marketPie" viewBox="0 0 200 200" role="img" aria-label="Relative scale of VA claims help competitors"></svg>
+        <ul class="pie-legend" id="pieLegend"></ul>
+      </div>
+      <div class="bar-caption">Relative scale of VA-claims-help players — proxy from public filings and claimed counts, not audited share. J4V is a rounding error next to the accredited VSOs.</div>
+    </div>
+  </div>
+
+  <!-- 2. THE PROBLEM -->
+  <div class="sec-label" id="s-problem"><span class="n">2</span><h2>The problem it solves</h2></div>
+  <div class="card" style="padding:1rem 1.2rem;margin-bottom:0.9rem">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--brick);margin-bottom:0.4rem">Lack of Sales Channel</h3>
+    <p style="font-size:0.9rem;font-weight:600;color:var(--ink-soft);line-height:1.55">Veteran Coaches lose leads because they cannot respond to inquiries fast enough. When a prospect searched for multiple solutions, the first to answer typically wins the client.</p>
+  </div>
+  <div class="pain-grid">
+    <div class="bezel"><div class="bezel-inner pain-card">
+      <h3><span class="swatch"></span>The Silence</h3>
+      <div class="big num">7%</div>
+      <p>Only 7% of businesses respond to a new inquiry within 5 minutes. 23% never respond at all. Every coach's missed DM, unanswered text, and full voicemail is a veteran who called someone else.</p>
+      <div class="src">Source: HBR, "The Short Life of Online Sales Leads" (2011)</div>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner pain-card">
+      <h3><span class="swatch"></span>The Chaos</h3>
+      <div class="big num">5 min → 30 min</div>
+      <p>Responding within 5 minutes carries 100× better odds of contact than waiting 30. But coaches are on calls, in meetings, living life — nobody can run a 5-minute SLA manually, across email, text, DMs, and missed calls, at 9 PM.</p>
+      <div class="src">Source: MIT / InsideSales Lead Response Management Study (2007)</div>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner pain-card">
+      <h3><span class="swatch"></span>The Invisibility</h3>
+      <div class="big num">3 names</div>
+      <p>When a veteran asks Google — or asks an AI — "who can help with my VA claim," there are three names in that answer. Coaches with no Google Business Profile, no reviews, and no search presence are not one of them. Invisibility isn't losing. It's not competing.</p>
+      <div class="src">The discovery layer moved to search & AI answers — with or without J4V</div>
+    </div></div>
+  </div>
+  <div class="shift-strip">
+    The shift: veterans now find help the way everyone does — they search, they ask AI, they message at night. <span class="gold">Coaches who answer in minutes and show up everywhere will take the market. The rest become invisible.</span> There is no middle outcome.
+  </div>
+  <div class="after-grid">
+    <div class="bezel"><div class="bezel-inner after-card">
+      <h3><span class="swatch"></span>Answered in under a minute</h3>
+      <p>Every inquiry — 9 PM, Sunday, holiday — gets a plain-spoken reply in the coach's voice. The veteran feels heard before doubt sets in.</p>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner after-card">
+      <h3><span class="swatch"></span>Booked without the coach</h3>
+      <p>The veteran picks a real slot from the coach's actual availability. No ping-pong, no double-booking, reminders automatic. The coach just shows up.</p>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner after-card">
+      <h3><span class="swatch"></span>Rapport before the call</h3>
+      <p>Reviews, credentials, and presence in search and AI answers do the convincing. The call starts warm, not cold.</p>
+    </div></div>
+  </div>
+
+  <!-- 3. SYSTEM ARCHITECTURE -->
+  <div class="sec-label" id="s-architecture"><span class="n">3</span><h2>System architecture</h2></div>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-node">
+        <h3><span class="flow-dot" style="background:var(--blue)"></span>Lead Sources</h3>
+        <p>Imported lead lists, referral forms, NFC calling-card taps.</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <h3><span class="flow-dot" style="background:var(--olive)"></span>TenaciTech Intake</h3>
+        <p>Validation, dedupe, bounce protection. Bad emails never reach a sequence.</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <h3><span class="flow-dot" style="background:var(--navy)"></span>Sales Engine</h3>
+        <p>Isolated workspace per coach. Runs sequences, tracks every touch.</p>
+        <span class="tag-pill" style="background:#e6e8e2;color:var(--ink-soft)">Fully managed by TenaciTech</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <h3><span class="flow-dot" style="background:var(--gold)"></span>Alter-ego Response</h3>
+        <p>Replies to questions, drafts responses, nudges non-bookers, flags hot leads.</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <h3><span class="flow-dot" style="background:var(--green)"></span>Coach Portal</h3>
+        <p>Clean pipeline view per coach. Leads move automatically — coach just takes calls.</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <h3><span class="flow-dot" style="background:var(--green)"></span>Call → Claim</h3>
+        <p>Veteran books, coach closes, program completes, VA claim submitted.</p>
+      </div>
+    </div>
+
+    <div class="engine-detail">
+      <h4>Inside the engine — every lead, every coach</h4>
+      <div class="engine-hint">Click any step to see it work ↓</div>
+      <div class="engine-steps">
+        <span class="engine-step" data-step="import" role="button" tabindex="0">Import batch</span>
+        <span class="engine-arrow">→</span>
+        <span class="engine-step" data-step="email" role="button" tabindex="0">Email sequence</span>
+        <span class="engine-arrow">→</span>
+        <span class="engine-step" data-step="booking" role="button" tabindex="0">Booking link</span>
+        <span class="engine-arrow">→</span>
+        <span class="engine-step ai" data-step="alterego" role="button" tabindex="0">J4V coach alter ego replies</span>
+        <span class="engine-arrow">→</span>
+        <span class="engine-step" data-step="intro" role="button" tabindex="0">Intro Call booked</span>
+        <span class="engine-arrow">→</span>
+        <span class="engine-step" data-step="sync" role="button" tabindex="0">Calendar sync</span>
+        <span class="engine-arrow">→</span>
+        <span class="engine-step ai" data-step="alert" role="button" tabindex="0">Hot lead alerts to coach</span>
+      </div>
+    </div>
+
+    <!-- See it working — lives inside the engine -->
+    <div class="sub-label" style="margin-top:1.4rem"><span class="tick"></span><h3>The Operating System</h3></div>
+    <div class="peek-grid" style="margin-top:0">
+      <div class="browser-frame">
+        <div class="bf-bar">
+          <span class="bf-dot" style="background:#e0675b"></span>
+          <span class="bf-dot" style="background:#e5b93f"></span>
+          <span class="bf-dot" style="background:#61c454"></span>
+          <span class="bf-url">app.just4veterans.com — Coach Portal · demo data</span>
+        </div>
+        <iframe src="coach-dashboard.html" title="Coach portal demo"></iframe>
+      </div>
+      <div class="bento-col">
+        <div class="bento-card">
+          <div class="bc-title"><span class="bc-dot" style="background:var(--blue)"></span>Alter-ego reply<span class="bc-pill">Engage</span></div>
+          <div class="sms">
+            <div>
+              <div class="sms-who">Veteran · 8:14 PM</div>
+              <div class="bubble in">What does the program cost?</div>
+            </div>
+            <div>
+              <div class="sms-who" style="text-align:right">Coach Ray — alter ego</div>
+              <div class="bubble out">No upfront cost — we only earn if your rating increases. Want me to grab you a 15-min intro slot this week?</div>
+            </div>
+            <div class="sms-status">Sent in 42s · logged to pipeline · hot-lead alert to coach</div>
+          </div>
+        </div>
+        <div class="bento-card">
+          <div class="bc-title"><span class="bc-dot" style="background:var(--green)"></span>Self-serve booking<span class="bc-pill">Engage</span></div>
+          <div class="slots">
+            <div><div class="slot-day">Mon</div><div class="slot na">—</div></div>
+            <div><div class="slot-day">Tue</div><div class="slot booked">10:00</div></div>
+            <div><div class="slot-day">Wed</div><div class="slot booked">1:00</div></div>
+            <div><div class="slot-day">Thu</div><div class="slot booked">11:30</div></div>
+            <div><div class="slot-day">Fri</div><div class="slot na">—</div></div>
+          </div>
+          <div class="slot-note">Every channel — email, SMS, chat, missed-call text-back — books into one availability pool. Double-booking is structurally impossible; the coach just shows up.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. WHAT THE ENGINE PRODUCES -->
+  <div class="sec-label" id="s-calculator"><span class="n">4</span><h2>Projection Calculator</h2></div>
+  <p class="sub" style="margin:-0.3rem 0 0.9rem">Decide where you want to be. Know the moves. See where your team stands in 30 days or 12 months.</p>
+
+  <div class="card">
+    <div class="calc-grid">
+      <div class="calc-field">
+        <label for="c-coaches">Number of coaches</label>
+        <input id="c-coaches" class="calc-input" type="number" min="1" step="1" value="138">
+      </div>
+      <div class="calc-field">
+        <label for="c-leads-total">Total leads / month (distributed)</label>
+        <input id="c-leads-total" class="calc-input" type="number" min="0" step="1000" value="5000">
+      </div>
+      <div class="calc-field">
+        <label for="c-rate">Conversion rate (%)</label>
+        <input id="c-rate" class="calc-input" type="number" min="0.1" max="100" step="0.1" value="5">
+      </div>
+      <div class="calc-field">
+        <label for="c-calls">Calls / day / coach (30 min each)</label>
+        <input id="c-calls" class="calc-input" type="number" min="1" max="16" step="1" value="8">
+      </div>
+      <div class="calc-field">
+        <label for="c-benefit">Avg Disability Benefit ($/mo)</label>
+        <input id="c-benefit" class="calc-input" type="number" min="0" step="50" value="1663">
+      </div>
+      <div class="calc-field">
+        <label for="c-share">Coach Share (%)</label>
+        <input id="c-share" class="calc-input" type="number" min="0" max="100" step="5" value="50">
+      </div>
+    </div>
+
+    <div class="chip-row">
+      <span class="chip-label">Scenario:</span>
+      <button class="chip" id="chip-worst" type="button">2 calls / day</button>
+      <button class="chip active" id="chip-best" type="button">8 calls / day</button>
+      <span class="assump">20 working days/mo · 30-min calls → max 16/day · leads split evenly across coaches</span>
+    </div>
+
+    <div class="calc-outs">
+      <div class="bezel"><div class="bezel-inner math-op">
+        <div class="math-val num" style="color:var(--blue)" id="o-leads-coach">10,000</div>
+        <div class="math-lbl">Leads / coach / mo</div>
+        <div class="math-note" id="o-booked-note">500 interested (5%)</div>
+      </div></div>
+      <div class="bezel"><div class="bezel-inner math-op">
+        <div class="math-val num" style="color:var(--navy)" id="o-capacity">160</div>
+        <div class="math-lbl">Call capacity / coach / mo</div>
+        <div class="math-note">8 calls/day × 20 days</div>
+      </div></div>
+      <div class="bezel"><div class="bezel-inner math-op">
+        <div class="math-val num" style="color:var(--green)" id="o-converted-coach">160</div>
+        <div class="math-lbl">Converted / coach / mo</div>
+        <div class="math-note" id="o-cap-note">Capped by capacity</div>
+      </div></div>
+      <div class="bezel"><div class="bezel-inner math-op">
+        <div class="math-val num" style="color:var(--green)" id="o-total-converted">24,000</div>
+        <div class="math-lbl">Converted total / mo</div>
+        <div class="math-note" id="o-conv-cap-note">All interested served</div>
+      </div></div>
+      <div class="bezel"><div class="bezel-inner math-op">
+        <div class="math-val num" style="color:var(--gold)" id="o-monthly">$199.6M</div>
+        <div class="math-lbl">J4V Gross Income</div>
+        <div class="math-note">converted × avg benefit × 5 months retro</div>
+      </div></div>
+      <div class="bezel"><div class="bezel-inner math-op">
+        <div class="math-val num" style="color:var(--olive)" id="o-share">$665K</div>
+        <div class="math-lbl">Coach Share / coach</div>
+        <div class="math-note" id="o-share-note">50% pool ÷ 150 coaches</div>
+      </div></div>
+      <div class="bezel"><div class="bezel-inner math-op">
+        <div class="math-val num" style="color:var(--gold)" id="o-annual">$1.2B</div>
+        <div class="math-lbl">J4V Net Income / yr</div>
+        <div class="math-note" id="o-annual-note">after 50% coach share</div>
+      </div></div>
+    </div>
+
+    <!-- 12-month ramp chart at bottom of calculator -->
+    <div class="chart-head">
+      <div>
+        <h3>Annual projection</h3>
+        <span class="assump">5 years of service. 1 year of scale</span>
+      </div>
+      <div class="chart-badge">
+        <div class="v num" id="ch-total">243,000</div>
+        <span class="assump">veterans served by month 12</span>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <svg id="chart" viewBox="0 0 640 240" preserveAspectRatio="none" role="img" aria-label="12 month cumulative veterans served projection"></svg>
+    </div>
+
+    <div class="assump" style="margin-top:0.8rem">Benefit default = 2025 average VA disability compensation (~$1,663/mo) — edit to model other ratings. J4V gross income = converted veterans × avg benefit × 5 months retro pay. Net income = gross × 12 × (1 − coach share). Conversion capped by coach call capacity: a coach cannot serve more veterans than 30-min calls allow.</div>
+  </div>
+
+  <!-- 5. PRICING -->
+  <div class="sec-label" id="s-pricing"><span class="n">5</span><h2>An Adaptive Solution, Priced to Scale</h2></div>
+  <div class="tier-grid">
+    <div class="tier-card tier-black">
+      <div class="tier-metal-tag">Black Card</div>
+      <div class="tier-name">DEPLOY</div>
+      <div class="tier-tagline">Establish your position.</div>
+      <div class="nfc-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.32a7.43 7.43 0 0 1 0 7.36" /> <path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58" /> <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8" /> <path d="M16.37 2a20.16 20.16 0 0 1 0 20" /></svg>
+        NFC calling card included
+      </div>
+      <ul class="tier-feats">
+        <li class="tier-plus ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg><span>Everything a coach needs to be findable and bookable</span></li>
+      </ul>
+      <div class="tier-more" id="tier-more-deploy" aria-hidden="true">
+        <div class="tier-more-inner">
+          <ul class="tier-feats">
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /></svg><span>Animated website + blog</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v3" /> <path d="M16 2v3" /> <rect x="3" y="3" width="18" height="18" rx="2" /> <path d="M3 9h18" /> <path d="m9 15 2 2 4-4" /></svg><span>Booking form + calendar</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /></svg><span>Fixed email sequence</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /> <path d="m9 12 2 2 4-4" /></svg><span>Trust wall — reviews, testimonials, credentials storytelling</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></svg><span>Service-area map + Google Business Profile setup</span></li>
+          </ul>
+        </div>
+      </div>
+      <button class="tier-toggle" type="button" aria-expanded="false" aria-controls="tier-more-deploy"><span class="plus" aria-hidden="true">+</span><span class="tier-toggle-label">5 more features</span></button>
+    </div>
+    <div class="tier-card tier-silver">
+      <div class="tier-metal-tag">Silver Card</div>
+      <div class="tier-name">ENGAGE</div>
+      <div class="tier-tagline">Every lead answered. Every channel.</div>
+      <div class="nfc-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.32a7.43 7.43 0 0 1 0 7.36" /> <path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58" /> <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8" /> <path d="M16.37 2a20.16 20.16 0 0 1 0 20" /></svg>
+        NFC calling card included
+      </div>
+      <ul class="tier-feats">
+        <li class="tier-plus ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg><span>Everything in Deploy, plus:</span></li>
+      </ul>
+      <div class="tier-more" id="tier-more-engage" aria-hidden="true">
+        <div class="tier-more-inner">
+          <ul class="tier-feats">
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></svg><span>Alter-ego email replies — answers in the coach's voice, under a minute</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /> <path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1" /></svg><span>Website chatbot + SMS chatbot</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z" /></svg><span>Speed-to-lead on every inquiry</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></svg><span>Review activation — the trust wall grows itself</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 2v3" /> <path d="M17 15.5v1.7l1 .625" /> <path d="M21 8.936V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h3.935" /> <path d="M3 9h9.873" /> <path d="M8 2v3" /> <circle cx="17" cy="17" r="5" /></svg><span>Automated booking — one availability pool, no double-booking</span></li>
+          </ul>
+        </div>
+      </div>
+      <button class="tier-toggle" type="button" aria-expanded="false" aria-controls="tier-more-engage"><span class="plus" aria-hidden="true">+</span><span class="tier-toggle-label">5 more features</span></button>
+    </div>
+    <div class="tier-card tier-gold">
+      <div class="tier-ribbon">Flagship</div>
+      <div class="tier-metal-tag">Gold Card</div>
+      <div class="tier-name">OVERWATCH</div>
+      <div class="tier-tagline">Eyes everywhere. Nothing missed.</div>
+      <div class="nfc-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.32a7.43 7.43 0 0 1 0 7.36" /> <path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58" /> <path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8" /> <path d="M16.37 2a20.16 20.16 0 0 1 0 20" /></svg>
+        NFC calling card included
+      </div>
+      <ul class="tier-feats">
+        <li class="tier-plus ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg><span>Everything in Engage, plus:</span></li>
+      </ul>
+      <div class="tier-more" id="tier-more-overwatch" aria-hidden="true">
+        <div class="tier-more-inner">
+          <ul class="tier-feats">
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19v3" /> <path d="M19 10v2a7 7 0 0 1-14 0v-2" /> <rect x="9" y="2" width="6" height="13" rx="3" /></svg><span>Voice AI on the website</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2a9 9 0 0 1 9 9" /> <path d="M13 6a5 5 0 0 1 5 5" /> <path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" /></svg><span>Voice speed-to-lead — answers the call itself</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></svg><span>GEO / SEO — cited in search and AI answers</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5" /> <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244" /> <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05" /></svg><span>Google Business Profile optimization</span></li>
+            <li class="ti"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34" /> <path d="M4 6h.01" /> <path d="M2.29 9.62A10 10 0 1 0 21.31 8.35" /> <path d="M16.24 7.76A6 6 0 1 0 8.23 16.67" /> <path d="M12 18h.01" /> <path d="M17.99 11.66A6 6 0 0 1 15.77 16.67" /> <circle cx="12" cy="12" r="2" /> <path d="m13.41 10.59 5.66-5.66" /></svg><span>Map pack + AI-answer visibility</span></li>
+          </ul>
+        </div>
+      </div>
+      <button class="tier-toggle" type="button" aria-expanded="false" aria-controls="tier-more-overwatch"><span class="plus" aria-hidden="true">+</span><span class="tier-toggle-label">5 more features</span></button>
+    </div>
+  </div>
+
+  <!-- COACH CHANNEL -->
+  <div class="sub-label"><span class="tick"></span><h3>Each coach gets a channel</h3></div>
+  <div class="card channel-card">
+    <div class="card-stack">
+      <div class="mini-card k-black"></div>
+      <div class="mini-card k-silver"></div>
+      <div class="mini-card k-gold"></div>
+    </div>
+    <div class="channel-body">
+      <h3>The Handshake Card</h3>
+      <p>Every tier ships with a physical NFC card in its finish — black, silver, or gold — laser-engraved with the coach's name. One tap from a phone opens the coach's personal page: story, credentials, reviews, and a booking button. No app. No typing. The card is the handshake; the page is the pitch.</p>
+      <div class="channel-url">tenaci-tech.com/portfolio/j4v-top-coach/</div>
+    </div>
+  </div>
+
+  <!-- 6. USE CASES -->
+  <div class="sec-label" id="s-use-cases"><span class="n">6</span><h2>Use cases</h2></div>
+  <div class="use-grid">
+    <div class="bezel"><div class="bezel-inner use-card">
+      <h3><span class="swatch" style="background:var(--brick)"></span>The 9:47 PM denial letter</h3>
+      <p>A veteran opens a denial letter at night and messages three coaches. The alter-ego answers in 42 seconds — in the coach's voice. By morning the intro call is booked. The other two coaches never knew the veteran existed.</p>
+      <p style="margin-top:0.5rem"><span class="use-tier t-silver">Engage</span></p>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner use-card">
+      <h3><span class="swatch" style="background:var(--blue)"></span>The viral Facebook post</h3>
+      <p>A coach's post in a 40K-member veterans group blows up: 300 messages in a day. The daily cap holds the line at 8 calls; everyone else gets booked into real future slots with automatic reminders. One post, one week of pipeline — zero burnout.</p>
+      <p style="margin-top:0.5rem"><span class="use-tier t-silver">Engage</span></p>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner use-card">
+      <h3><span class="swatch" style="background:var(--olive)"></span>The VFW handshake</h3>
+      <p>A coach meets a veteran at a VFW event. Instead of "I'll text you my calendar," the veteran taps the coach's NFC card — black, silver, or gold — and the coach's page opens with reviews up top. The intro call is booked before the coffee gets cold.</p>
+      <p style="margin-top:0.5rem"><span class="use-tier t-black">Deploy</span> <span class="use-tier t-silver">Engage</span> <span class="use-tier t-gold">Overwatch</span></p>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner use-card">
+      <h3><span class="swatch" style="background:var(--green)"></span>The coach who finally takes a weekend</h3>
+      <p>Coach goes off-grid for two days. The engine keeps answering, keeps booking into real availability, and holds non-urgent questions. She returns to six booked intro calls and two hot-lead alerts that actually needed a human.</p>
+      <p style="margin-top:0.5rem"><span class="use-tier t-silver">Engage</span></p>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner use-card">
+      <h3><span class="swatch" style="background:var(--gold)"></span>The review that sells while they sleep</h3>
+      <p>Ninety days after onboarding, the veteran gets one plain, human request for a review. It lands on Google and the coach's trust wall. The next veteran comparing three coaches picks the one with 47 five-star answers — before any call happens.</p>
+      <p style="margin-top:0.5rem"><span class="use-tier t-black">Deploy</span> <span class="use-tier t-silver">Engage</span></p>
+    </div></div>
+    <div class="bezel"><div class="bezel-inner use-card">
+      <h3><span class="swatch" style="background:var(--navy)"></span>J4V HQ — the network view</h3>
+      <p>Response times, bookings, and capacity across all 138 coaches in one dashboard. Who's drowning, who has room, where leads are going unanswered — the data layer that makes network-level decisions (like lead routing) possible. A separate conversation, and the natural next one.</p>
+      <p style="margin-top:0.5rem"><span class="use-tier">J4V level</span></p>
+    </div></div>
+  </div>
+
+  <!-- REVENUE -->
+  <div class="rev-strip" id="s-offer">
+    <div>
+      <h2>The offer to J4V</h2>
+      <p>Zero new headcount. Zero software burden on coaches. TenaciTech runs the engine, J4V keeps the coaching relationship.</p>
+    </div>
+    <div class="rev-items">
+      <div class="rev-item"><div class="v num">SaaS</div><div class="l">Software as a Service · per coach / month</div></div>
+      <div class="rev-item"><div class="v num" id="rev-coaches">150</div><div class="l">Engines day one</div></div>
+      <div class="rev-item"><div class="v num" id="rev-conv">24K</div><div class="l">Claims / mo potential</div></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <div>
+        <h3 id="modal-title"></h3>
+        <div class="modal-tier" id="modal-tier"></div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="demo-stage" id="demo-stage"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+  </div>
+</div>
+
+<footer>Prepared for J4V founder presentation. Engine = GoHighLevel sub-accounts fully managed by TenaciTech; coaches see only their portal. Tier names: Deploy / Engage / Overwatch — Black / Silver / Gold.</footer>
+
+<script src="motion.mini.js"></script>
+<script>
+(function () {
+  var WORK_DAYS = 20;
+  var MAX_CALLS = 16; // 30-min calls in an 8-hour day
+
+  function $(id) { return document.getElementById(id); }
+  function fmt(n) { return Math.round(n).toLocaleString("en-US"); }
+  function compact(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(n % 1e6 === 0 ? 0 : 1) + "M";
+    if (n >= 1e3) return Math.round(n / 1e3) + "K";
+    return fmt(n);
+  }
+  function money(n) {
+    if (n >= 1e9) return "$" + (n / 1e9).toFixed(1) + "B";
+    if (n >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+    if (n >= 1e3) return "$" + Math.round(n / 1e3) + "K";
+    return "$" + fmt(n);
+  }
+  function read(input, min, max) {
+    var v = parseFloat(input.value);
+    if (isNaN(v)) v = min;
+    return Math.min(max, Math.max(min, v));
+  }
+
+  // Core invariant: converted per coach = min(interested, call capacity)
+  function model(coaches, leadsTotal, rate, callsDay) {
+    var leadsCoach = coaches > 0 ? leadsTotal / coaches : 0;
+    var capacity = callsDay * WORK_DAYS;
+    var booked = leadsCoach * rate / 100;
+    var convCoach = Math.min(booked, capacity);
+    return {
+      leadsCoach: leadsCoach, capacity: capacity, booked: booked,
+      convCoach: convCoach, totalConv: convCoach * coaches
+    };
+  }
+
+  // 12-month cumulative ramp, driven by calculator state.
+  // Ramp: coaches onboard linearly, 25% active in M1 → 100% by M6.
+  var chartAnimated = false;
+  function renderChart(monthlyConv) {
+    var svg = $("chart");
+    if (!svg) return;
+    var NS = "http://www.w3.org/2000/svg";
+    var W = 640, H = 240, L = 52, R = 16, T = 14, B = 28;
+    var ALLTIME = 165000;
+
+    var pts = [], cum = 0, i, m;
+    for (m = 1; m <= 12; m++) {
+      var ramp = Math.min(1, 0.25 + 0.75 * m / 6);
+      cum += monthlyConv * ramp;
+      pts.push(cum);
+    }
+    var maxV = Math.max(cum, ALLTIME) * 1.12;
+    function x(i) { return L + (W - L - R) * (i / 11); }
+    function y(v) { return T + (H - T - B) * (1 - v / maxV); }
+
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var defs = document.createElementNS(NS, "defs");
+    defs.innerHTML = '<linearGradient id="chgrad" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#3e7a55" stop-opacity="0.28"/>' +
+      '<stop offset="100%" stop-color="#3e7a55" stop-opacity="0.02"/></linearGradient>';
+    svg.appendChild(defs);
+
+    for (i = 1; i <= 4; i++) {
+      var gv = maxV * i / 4;
+      var gl = document.createElementNS(NS, "line");
+      gl.setAttribute("x1", L); gl.setAttribute("x2", W - R);
+      gl.setAttribute("y1", y(gv)); gl.setAttribute("y2", y(gv));
+      gl.setAttribute("class", "chart-grid-line");
+      svg.appendChild(gl);
+      var gt = document.createElementNS(NS, "text");
+      gt.setAttribute("x", L - 6); gt.setAttribute("y", y(gv) + 3);
+      gt.setAttribute("text-anchor", "end"); gt.setAttribute("class", "chart-axis-label");
+      gt.textContent = compact(gv);
+      svg.appendChild(gt);
+    }
+
+    [0, 2, 5, 8, 11].forEach(function (idx) {
+      var xt = document.createElementNS(NS, "text");
+      xt.setAttribute("x", x(idx)); xt.setAttribute("y", H - 8);
+      xt.setAttribute("text-anchor", "middle"); xt.setAttribute("class", "chart-axis-label");
+      xt.textContent = "M" + (idx + 1);
+      svg.appendChild(xt);
+    });
+
+    var ref = document.createElementNS(NS, "line");
+    ref.setAttribute("x1", L); ref.setAttribute("x2", W - R);
+    ref.setAttribute("y1", y(ALLTIME)); ref.setAttribute("y2", y(ALLTIME));
+    ref.setAttribute("class", "chart-ref");
+    svg.appendChild(ref);
+    var rlab = document.createElementNS(NS, "text");
+    rlab.setAttribute("x", W - R); rlab.setAttribute("y", y(ALLTIME) - 5);
+    rlab.setAttribute("text-anchor", "end"); rlab.setAttribute("class", "chart-ref-label");
+    rlab.textContent = "165K — J4V all-time served";
+    svg.appendChild(rlab);
+
+    var d = pts.map(function (v, idx) { return (idx ? "L" : "M") + x(idx).toFixed(1) + " " + y(v).toFixed(1); }).join(" ");
+    var area = document.createElementNS(NS, "path");
+    area.setAttribute("d", d + " L" + x(11) + " " + (H - B) + " L" + L + " " + (H - B) + " Z");
+    area.setAttribute("fill", "url(#chgrad)");
+    svg.appendChild(area);
+    var line = document.createElementNS(NS, "path");
+    line.setAttribute("d", d);
+    line.setAttribute("class", "chart-line");
+    svg.appendChild(line);
+
+    for (i = 0; i < 12; i++) { if (pts[i] >= ALLTIME) break; }
+    if (i < 12) {
+      var cm = document.createElementNS(NS, "circle");
+      cm.setAttribute("cx", x(i)); cm.setAttribute("cy", y(pts[i]));
+      cm.setAttribute("r", 4); cm.setAttribute("class", "chart-dot");
+      svg.appendChild(cm);
+      var ct = document.createElementNS(NS, "text");
+      ct.setAttribute("x", x(i)); ct.setAttribute("y", y(pts[i]) - 10);
+      ct.setAttribute("text-anchor", "middle"); ct.setAttribute("class", "chart-cross-label");
+      ct.textContent = "matches all-time served · M" + (i + 1);
+      svg.appendChild(ct);
+    }
+
+    var ring = document.createElementNS(NS, "circle");
+    ring.setAttribute("cx", x(11)); ring.setAttribute("cy", y(cum));
+    ring.setAttribute("class", "chart-ring");
+    svg.appendChild(ring);
+    var dot = document.createElementNS(NS, "circle");
+    dot.setAttribute("cx", x(11)); dot.setAttribute("cy", y(cum));
+    dot.setAttribute("r", 4.5); dot.setAttribute("class", "chart-dot");
+    svg.appendChild(dot);
+
+    if (!chartAnimated) {
+      var len = line.getTotalLength();
+      line.style.strokeDasharray = len;
+      line.style.strokeDashoffset = len;
+      line.getBoundingClientRect();
+      line.style.transition = "stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1)";
+      line.style.strokeDashoffset = "0";
+      chartAnimated = true;
+    }
+
+    setNum("ch-total", fmt(cum));
+  }
+
+  // ── Engine step modals (animated demos; swap stage innerHTML for a <video> when footage lands) ──
+  var STEP_CONTENT = {
+    import: {
+      title: "Import batch",
+      tier: "Engine core · every tier",
+      desc: "Lead lists arrive from spreadsheets, referral forms, and card taps. Each record is validated, deduped, and bounced addresses are quarantined before a single email goes out — protecting the coach's sender reputation from day one.",
+      stage: '<div class="demo-el d-loop" style="left:8%;top:22%"><span class="demo-chip">Marcus R. · USMC · San Diego</span></div>' +
+             '<div class="demo-el d-loop d2" style="left:8%;top:44%"><span class="demo-chip">Tanya W. · Army · Austin</span></div>' +
+             '<div class="demo-el d-loop d3" style="left:8%;top:66%"><span class="demo-chip">James O. · Navy · Jacksonville</span></div>'
+    },
+    email: {
+      title: "Email sequence",
+      tier: "Deploy",
+      desc: "The fixed sequence goes out on schedule — the coach's story, the proof, the offer. Opens and clicks are tracked on every contact, so interest is visible the moment it happens.",
+      stage: '<div class="demo-path"></div>' +
+             '<div class="demo-el d-travel" style="top:calc(50% - 5px)"><span class="demo-dot"></span></div>' +
+             '<div class="demo-el d-pop d2" style="left:12%;top:64%"><span class="demo-chip">Email 1 · Your next mission</span></div>' +
+             '<div class="demo-el d-pop d3" style="left:44%;top:18%"><span class="demo-chip">Email 2 · Proof</span></div>'
+    },
+    booking: {
+      title: "Booking link",
+      tier: "Deploy",
+      desc: "Every email and page carries the coach's booking link. The veteran sees only real availability — the same calendar every channel draws from.",
+      stage: '<div class="demo-el d-loop" style="left:8%;top:16%"><span class="demo-chip" style="color:var(--blue);border-color:#b9c9d8">Calling card page →</span></div>' +
+             '<div style="position:absolute;left:10%;right:10%;top:48%;display:flex;gap:0.6rem;justify-content:center">' +
+             '<div class="demo-slot on d-loop d2">Tue 10:00</div>' +
+             '<div class="demo-slot d-loop d3">Wed 1:00</div>' +
+             '<div class="demo-slot d-loop d4">Thu 11:30</div></div>'
+    },
+    alterego: {
+      title: "J4V coach alter ego replies",
+      tier: "Engage",
+      desc: "When a veteran replies — a question, an objection, a pricing probe — the alter ego answers in the coach's voice in under a minute, at any hour. Plain-spoken, never robotic, and it hands off to the human the moment it's out of its depth.",
+      stage: '<div class="demo-el d-loop" style="left:6%;top:18%"><div class="demo-bubble-in">What does the program cost?</div></div>' +
+             '<div class="demo-el d-pop d2" style="right:6%;top:50%"><div class="demo-bubble">No upfront cost — we only earn if your rating increases.</div></div>' +
+             '<div class="demo-el d-loop d3" style="left:8%;top:80%;font-size:0.66rem;font-weight:700;color:var(--green)">Answered in 42s · 8:14 PM</div>'
+    },
+    intro: {
+      title: "Intro Call booked",
+      tier: "Engage",
+      desc: "The veteran picks a slot and it's theirs — confirmed instantly, reminder queued with a prep list (DD-214, denial letter). No coach involvement, no back-and-forth.",
+      stage: '<div class="demo-el d-pop" style="left:10%;top:26%"><div class="demo-chip">Tue · 10:00 AM · Intro Call</div></div>' +
+             '<div class="demo-el d-stamp" style="left:50%;top:58%;transform-origin:center"><span class="demo-stamp-el">Booked</span></div>'
+    },
+    sync: {
+      title: "Calendar sync",
+      tier: "Deploy + Engage",
+      desc: "One availability pool feeds every channel — email links, chatbot, SMS, missed-call text-back. A slot taken anywhere disappears everywhere. Buffers and daily caps keep the coach's day humane.",
+      stage: '<div class="demo-el d-loop" style="left:8%;top:30%"><span class="demo-chip">Email booking</span></div>' +
+             '<div class="demo-el d-loop d2" style="left:38%;top:30%"><span class="demo-chip">Chat booking</span></div>' +
+             '<div class="demo-el d-loop d3" style="left:68%;top:30%"><span class="demo-chip">SMS booking</span></div>' +
+             '<div class="demo-el d-pop d2" style="left:34%;top:66%"><span class="demo-chip" style="color:var(--green);border-color:#bcd8be">ONE CALENDAR</span></div>'
+    },
+    alert: {
+      title: "Hot lead alerts to coach",
+      tier: "Engage",
+      desc: "High-intent signals — repeated opens, pricing questions, clicked booking links — trigger an alert to the coach: who, what they asked, and the suggested next move. The coach spends minutes on the leads most likely to close.",
+      stage: '<div class="demo-el d-loop" style="left:8%;top:14%"><div class="demo-chip"><svg style="width:0.75rem;height:0.75rem;vertical-align:-0.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" /></svg> Marcus R. asked about pricing · opened 3 emails</div></div>' +
+             '<div class="demo-el d-loop d2" style="left:8%;top:46%"><div class="demo-chip"><svg style="width:0.75rem;height:0.75rem;vertical-align:-0.1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" /></svg> Tanya W. clicked booking link twice</div></div>' +
+             '<div class="demo-el d-loop d3" style="left:8%;top:78%"><div class="demo-chip" style="color:var(--green);border-color:#bcd8be">✓ Suggested: call now</div></div>'
+    }
+  };
+
+  function openModal(step) {
+    var c = STEP_CONTENT[step];
+    if (!c) return;
+    $("modal-title").textContent = c.title;
+    $("modal-tier").textContent = c.tier;
+    $("modal-desc").textContent = c.desc;
+    $("demo-stage").innerHTML = c.stage;
+    $("modal").classList.add("open");
+  }
+  function closeModal() { $("modal").classList.remove("open"); }
+
+  document.querySelectorAll(".engine-step").forEach(function (el) {
+    el.addEventListener("click", function () { openModal(el.getAttribute("data-step")); });
+    el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openModal(el.getAttribute("data-step")); } });
+  });
+  $("modal-close").addEventListener("click", closeModal);
+  $("modal").addEventListener("click", function (e) { if (e.target.id === "modal") closeModal(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+  // ── Competitor landscape pie (relative scale proxies from the competitor analysis session) ──
+  // J4V's slice is sized to equal the served % from the gap control; competitors stay fixed.
+  var OTHERS = [
+    { n: "Accredited VSOs (DAV, VFW, Legion) — free", v: 500, c: "#1e2a33" },
+    { n: "VA Claims Insider", v: 50, c: "#3d6486" },
+    { n: "Veterans Guardian", v: 15, c: "#4c5c3c" },
+    { n: "Trajector Medical", v: 12, c: "#8a938b" },
+    { n: "XTerra Health", v: 8, c: "#b9a06a" },
+    { n: "REE Medical", v: 5, c: "#c9ccd0" }
+  ];
+  function renderPie(servedPct) {
+    var svg = $("marketPie"), legend = $("pieLegend");
+    if (!svg || !legend) return;
+    var NS = "http://www.w3.org/2000/svg";
+    var eff = Math.min(Math.max(servedPct || 0, 0.01), 99.9);
+    var othersTotal = OTHERS.reduce(function (s, p) { return s + p.v; }, 0);
+    // size J4V so its slice equals exactly the served % of the pie
+    var j4vUnits = eff / (100 - eff) * othersTotal;
+    var total = othersTotal + j4vUnits;
+    var items = OTHERS.concat([{
+      n: "J4V — " + compact(TOTAL_VETS * eff / 100) + " served",
+      v: j4vUnits, c: "#3e7a55"
+    }]);
+    // bar-chart-race ordering: biggest slice first; J4V climbs the ranks as the % grows
+    items.sort(function (a, b) { return b.v - a.v; });
+    var r = 66, C = 2 * Math.PI * r, offset = 0;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    legend.innerHTML = "";
+    items.forEach(function (p, rank) {
+      var seg = p.v / total * C;
+      var ring = document.createElementNS(NS, "circle");
+      ring.setAttribute("cx", 100); ring.setAttribute("cy", 100); ring.setAttribute("r", r);
+      ring.setAttribute("fill", "none"); ring.setAttribute("stroke", p.c);
+      ring.setAttribute("stroke-width", "34");
+      ring.setAttribute("stroke-dasharray", Math.max(seg - 1.5, 0.5) + " " + (C - Math.max(seg - 1.5, 0.5)));
+      ring.setAttribute("stroke-dashoffset", -offset);
+      ring.setAttribute("transform", "rotate(-90 100 100)");
+      svg.appendChild(ring);
+      offset += seg;
+      var li = document.createElement("li");
+      var pct = p.v / total * 100;
+      li.innerHTML = '<span class="rk">' + (rank + 1) + '</span><span class="dot" style="background:' + p.c + '"></span>' + p.n +
+        '<span class="pv">' + (pct < 2 ? pct.toFixed(1) : Math.round(pct)) + '%</span>';
+      legend.appendChild(li);
+    });
+    var ct = document.createElementNS(NS, "text");
+    ct.setAttribute("x", 100); ct.setAttribute("y", 96);
+    ct.setAttribute("text-anchor", "middle");
+    ct.setAttribute("style", "font-size:15px;font-weight:800;fill:#1c2420");
+    ct.textContent = "J4V";
+    svg.appendChild(ct);
+    var ct2 = document.createElementNS(NS, "text");
+    ct2.setAttribute("x", 100); ct2.setAttribute("y", 113);
+    ct2.setAttribute("text-anchor", "middle");
+    ct2.setAttribute("style", "font-size:10px;font-weight:700;fill:#5f6a60");
+    ct2.textContent = (Math.round(eff * 100) / 100) + "%";
+    svg.appendChild(ct2);
+  }
+
+  // ── Served-% control: drives bar, labels, tiles, and the pie ──
+  var TOTAL_VETS = 17000000;
+  function updateGap(pct) {
+    var served = TOTAL_VETS * pct / 100;
+    var unserved = TOTAL_VETS - served;
+    var pctTxt = (pct % 1 === 0 ? pct : Math.round(pct * 100) / 100);
+    $("gap-bar").style.flexBasis = Math.max(pct, 0.5) + "%";
+    $("gap-bar-label").textContent = "Served · " + compact(served) + " (" + pctTxt + "%)";
+    $("gap-open").textContent = "Unserved · " + fmt(unserved) + " veterans";
+    $("g-served-num").textContent = fmt(served);
+    $("g-served-sub").textContent = pctTxt + "% of the market";
+    $("g-unserved-num").textContent = fmt(unserved);
+    $("g-unserved-sub").textContent = (Math.round((100 - pct) * 100) / 100) + "% waiting";
+    $("gap-caption").textContent = "≈ " + Math.round(pct * 10) + " per 1,000 veterans — the bottleneck isn't demand, it's the sales engine in front of each coach.";
+    renderPie(pct);
+  }
+
+  // Ladder the gap value toward its target so bar, tiles, and pie glide instead of snapping.
+  var gapAnim = { cur: 0.97, raf: null };
+  var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function animateGap(target) {
+    if (gapAnim.raf) cancelAnimationFrame(gapAnim.raf);
+    if (REDUCED) { gapAnim.cur = target; updateGap(target); return; }
+    var start = gapAnim.cur, t0 = performance.now(), DUR = 900;
+    function tick(now) {
+      var t = Math.min((now - t0) / DUR, 1);
+      var e = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      gapAnim.cur = start + (target - start) * e;
+      updateGap(gapAnim.cur);
+      if (t < 1) gapAnim.raf = requestAnimationFrame(tick);
+      else { gapAnim.cur = target; updateGap(target); }
+    }
+    gapAnim.raf = requestAnimationFrame(tick);
+  }
+
+  // ── Number ticker: calculator outputs roll digit-by-digit (odometer; higher places settle later) ──
+  // recalc owns the model; setNum owns the display transition.
+  // a11y: full text via aria-label; animated layer aria-hidden; reduced-motion → instant text.
+  var TK_DUR = 700;    // ms for a digit to roll
+  var TK_STAGGER = 55; // ms extra settle per higher place (leftmost settles last)
+  var tkState = new WeakMap();
+  var tkIO = ("IntersectionObserver" in window && !REDUCED) ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var st = tkState.get(en.target);
+      if (st && st.pending) { st.pending = false; applyTicker(en.target, st.text, true); }
+      tkIO.unobserve(en.target);
+    });
+  }, { threshold: 0.4 }) : null;
+
+  // First render rolls up from 0 when scrolled into view; later renders roll from the previous value.
+  function setNum(id, text) {
+    var el = $(id);
+    if (!el) return;
+    var st = tkState.get(el);
+    if (!st) {
+      st = { text: "", pending: false };
+      tkState.set(el, st);
+      if (tkIO) {
+        st.pending = true;
+        st.text = text;
+        el.textContent = text;
+        el.setAttribute("aria-label", text);
+        tkIO.observe(el);
+        return;
+      }
+      applyTicker(el, text, true);
+      return;
+    }
+    // A later setNum means the model moved (user input) — reveal now even if IO hasn't fired.
+    if (st.pending) { st.pending = false; if (tkIO) tkIO.unobserve(el); applyTicker(el, text, true); return; }
+    if (st.text !== text) applyTicker(el, text, false);
+  }
+
+  function applyTicker(el, text, initial) {
+    var st = tkState.get(el);
+    var oldText = initial ? "" : st.text;
+    st.text = text;
+    el.setAttribute("aria-label", text);
+    if (REDUCED) { el.textContent = text; return; }
+
+    var oldChars = oldText.split(""), newChars = text.split("");
+    var maxLen = Math.max(oldChars.length, newChars.length);
+    while (oldChars.length < maxLen) oldChars.unshift("");
+    while (newChars.length < maxLen) newChars.unshift("");
+
+    var digitPlaces = [];
+    newChars.forEach(function (c, i) { if (/\d/.test(c)) digitPlaces.push(i); });
+
+    var wrap = document.createElement("span");
+    wrap.className = "tk";
+    wrap.setAttribute("aria-hidden", "true");
+
+    newChars.forEach(function (c, i) {
+      if (c === "") return;
+      if (!/\d/.test(c)) {
+        var s = document.createElement("span");
+        s.className = "tk-char tk-static";
+        s.textContent = c;
+        wrap.appendChild(s);
+        return;
+      }
+      var box = document.createElement("span");
+      box.className = "tk-char";
+      var strip = document.createElement("span");
+      strip.className = "tk-strip";
+      var html = "";
+      for (var k = 0; k < 20; k++) html += "<span>" + (k % 10) + "</span>";
+      strip.innerHTML = html;
+      var from = /\d/.test(oldChars[i]) ? +oldChars[i] : 0;
+      strip.style.transitionDuration = "0s";
+      strip.style.transform = "translateY(-" + from + "em)";
+      var place = digitPlaces.indexOf(i);
+      var delay = (digitPlaces.length - 1 - place) * TK_STAGGER;
+      var target = from + ((+c - from + 10) % 10);
+      box.appendChild(strip);
+      wrap.appendChild(box);
+      // Commit start position synchronously (forced reflow), then transition to target —
+      // rAF-gated kicks silently never run where compositor frames don't fire.
+      strip.getBoundingClientRect();
+      strip.style.transitionDelay = delay + "ms";
+      strip.style.transitionDuration = TK_DUR + "ms";
+      strip.style.transform = "translateY(-" + target + "em)";
+    });
+
+    el.textContent = "";
+    el.appendChild(wrap);
+  }
+
+  // ── Calculator ──
+  function recalc() {
+    var coaches = read($("c-coaches"), 1, 100000);
+    var leadsTotal = read($("c-leads-total"), 0, 1e9);
+    var rate = read($("c-rate"), 0.1, 100);
+    var calls = read($("c-calls"), 1, MAX_CALLS);
+    var benefit = read($("c-benefit"), 0, 1e6);
+    var share = read($("c-share"), 0, 100);
+
+    var m = model(coaches, leadsTotal, rate, calls);
+    var grossMo = m.totalConv * benefit * 5;
+    var netYr = grossMo * 12 * (1 - share / 100);
+
+    setNum("o-leads-coach", m.leadsCoach >= 10 ? compact(m.leadsCoach) : m.leadsCoach.toFixed(1));
+    $("o-booked-note").textContent = fmt(m.booked) + " interested (" + (rate % 1 === 0 ? rate : rate.toFixed(1)) + "%)";
+    setNum("o-capacity", fmt(m.capacity));
+    setNum("o-converted-coach", m.convCoach >= 10 ? compact(m.convCoach) : m.convCoach.toFixed(1));
+    var capped = m.booked > m.capacity;
+    $("o-cap-note").textContent = capped ? "Capped — " + fmt(m.booked - m.capacity) + " interested unserved" : "All interested served";
+    setNum("o-total-converted", fmt(m.totalConv));
+    $("o-conv-cap-note").textContent = capped
+      ? fmt(m.booked * coaches - m.totalConv) + " veterans interested but unserved"
+      : "All interested served";
+    setNum("o-monthly", money(grossMo));
+    setNum("o-share", money(grossMo * share / 100 / coaches));
+    $("o-share-note").textContent = share + "% pool ÷ " + fmt(coaches) + " coaches";
+    setNum("o-annual", money(netYr));
+    $("o-annual-note").textContent = "after " + share + "% coach share";
+
+    renderChart(m.totalConv);
+
+    $("rev-coaches").textContent = compact(coaches);
+    $("rev-conv").textContent = compact(m.totalConv);
+
+    $("chip-worst").classList.toggle("active", calls === 2);
+    $("chip-best").classList.toggle("active", calls === 8);
+  }
+
+  ["c-coaches", "c-leads-total", "c-rate", "c-calls", "c-benefit", "c-share"].forEach(function (id) {
+    $(id).addEventListener("input", recalc);
+  });
+  $("chip-worst").addEventListener("click", function () { $("c-calls").value = 2; recalc(); });
+  $("chip-best").addEventListener("click", function () { $("c-calls").value = 8; recalc(); });
+  $("gap-pct").addEventListener("input", function () { animateGap(read($("gap-pct"), 0.01, 100)); });
+
+  // ── Timeline rail nav: scrollspy drives .on; CSS owns the motion ──
+  var tlItems = Array.prototype.slice.call(document.querySelectorAll(".tl-item"));
+  if (tlItems.length) {
+    var tlTargets = tlItems.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+    function tlSpy() {
+      var idx = 0;
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8) {
+        idx = tlTargets.length - 1;
+      } else {
+        var line = window.scrollY + window.innerHeight * 0.35;
+        tlTargets.forEach(function (t, i) {
+          if (t && t.getBoundingClientRect().top + window.scrollY <= line) idx = i;
+        });
+      }
+      tlItems.forEach(function (a, i) { a.classList.toggle("on", i === idx); });
+    }
+    window.addEventListener("scroll", tlSpy, { passive: true });
+    tlSpy();
+  }
+
+  // ── Tier cards: spring expand from summary bullet (Motion physics; instant fallback) ──
+  var hasMotion = typeof Motion !== "undefined" && !!Motion.animate;
+  document.querySelectorAll(".tier-card").forEach(function (card) {
+    var btn = card.querySelector(".tier-toggle");
+    var more = card.querySelector(".tier-more");
+    var inner = card.querySelector(".tier-more-inner");
+    var label = card.querySelector(".tier-toggle-label");
+    if (!btn || !more || !inner || !label) return;
+    var items = inner.querySelectorAll("li");
+    var count = items.length;
+    var anim = null;
+
+    function setState(open) {
+      card.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+      more.setAttribute("aria-hidden", String(!open));
+      label.textContent = open ? "Show less" : count + " more features";
+    }
+    function stopAnim() { if (anim) { anim.stop(); anim = null; } }
+
+    function expand() {
+      setState(true);
+      if (REDUCED || !hasMotion) {
+        more.style.height = "auto";
+        return;
+      }
+      stopAnim();
+      var target = inner.scrollHeight;
+      var mine = anim = Motion.animate(more, { height: [more.getBoundingClientRect().height, target] },
+        { type: "spring", stiffness: 300, damping: 30 });
+      mine.then(function () { if (anim === mine) more.style.height = "auto"; });
+      items.forEach(function (li, i) {
+        Motion.animate(li,
+          { opacity: [0, 1], transform: ["translateY(10px) scale(0.97)", "translateY(0px) scale(1)"] },
+          { type: "spring", stiffness: 420, damping: 28, delay: 0.07 + i * 0.05 });
+      });
+    }
+    function collapse() {
+      setState(false);
+      if (REDUCED || !hasMotion) { more.style.height = "0px"; return; }
+      stopAnim();
+      more.style.height = more.getBoundingClientRect().height + "px"; // pin auto before spring
+      var mine = anim = Motion.animate(more, { height: 0 }, { type: "spring", stiffness: 340, damping: 34 });
+      mine.then(function () { if (anim === mine) more.style.height = "0px"; });
+    }
+    function toggle() { card.classList.contains("open") ? collapse() : expand(); }
+
+    btn.addEventListener("click", function (e) { e.stopPropagation(); toggle(); });
+    card.addEventListener("click", toggle);
+  });
+
+  updateGap(gapAnim.cur);
+  recalc();
+})();
+</script>
+
+</body>
+</html>
