@@ -35,6 +35,15 @@
   h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
   .subtitle { color: var(--ink-soft); font-weight: 500; margin-bottom: 2rem; max-width: 60ch; }
   .section { margin-bottom: 3rem; }
+  /* ── Embed mode (iframes, e.g. the architecture page modal): everything fits without scroll ── */
+  body.embed .container { padding: 0.6rem 1.5rem; }
+  body.embed h1, body.embed .subtitle { display: none; }
+  body.embed .section { margin-bottom: 0.5rem; }
+  body.embed .section-title { margin-bottom: 0.5rem; }
+  body.embed .steps { margin-bottom: 0.6rem; }
+  body.embed .controls { margin-top: 0.6rem; padding-top: 0.6rem; }
+  body.embed .controls .btn { padding: 0.45rem 1rem; font-size: 0.75rem; }
+  body.embed .reader-device { max-width: min(280px, calc((100vh - 290px) / 1.85)); }
   .section-title { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--olive); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
   .section-title .dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--olive); }
 
@@ -774,6 +783,7 @@
   });
 
   // Initialize (tier preselectable via ?tier=black|silver|gold, e.g. from the architecture page)
+  if (window.self !== window.top) document.body.classList.add('embed');
   var initialTier = new URLSearchParams(location.search).get('tier');
   if (['black', 'silver', 'gold'].indexOf(initialTier) === -1) initialTier = 'black';
   applyTier(initialTier);

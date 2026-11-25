@@ -485,11 +485,12 @@
   .mini-card.k-gold { background: linear-gradient(150deg, #f7e6b4, #cfa14f); }
   /* Handshake demo overlay (iframe of j4v-handshake-card.html) */
   .hs-panel {
-    background: var(--paper); border-radius: 14px; max-width: min(940px, 94vw); width: 100%;
+    background: var(--paper); border-radius: 14px; width: min(1240px, 96vw); height: 94vh;
+    display: flex; flex-direction: column;
     box-shadow: 0 24px 64px rgba(28,36,32,0.3); overflow: hidden;
     animation: modalIn 0.3s var(--ease);
   }
-  .hs-panel iframe { border: none; width: 100%; height: min(72vh, 620px); display: block; background: var(--paper); }
+  .hs-panel iframe { border: none; width: 100%; flex: 1; min-height: 0; display: block; background: var(--paper); }
   .channel-body h3 { font-size: 1rem; font-weight: 800; }
   .channel-body p { font-size: 0.8rem; color: var(--ink-soft); font-weight: 600; margin-top: 0.3rem; line-height: 1.5; }
   .channel-url { font-size: 0.75rem; color: var(--blue); font-weight: 700; margin-top: 0.3rem; word-break: break-all; }
